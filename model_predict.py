@@ -5,7 +5,6 @@
 @Author ：nkul
 @Date ：2023/4/10 下午2:12 
 """
-import multiprocessing
 import os
 import time
 
@@ -94,7 +93,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     model, _padding, _, _ = get_model(model_name)
 
     # 2) Load File
-    print(f'Loading predict data:{predict_file}')
+    print(f'Loading predict data: {predict_file}')
     # Load Predict Data
     in_dir = os.path.join(root_dir, 'data')
     predict_file_path = os.path.join(in_dir, predict_file)
@@ -109,22 +108,9 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     res_hic = __model_predict(model, predict_loader, best_ckpt_file)
     end = time.time()
 
-    # 5) save data
-    out_dir = os.path.join(root_dir, 'predict')
+    print(f'Model running cost is {(end - start):.6f} s.')
+
+    # 5） return, put save code in main func as multiprocess must be created in main
     sizes = __data_info(predict_data_np)
+    return res_hic, sizes
 
-    def save_data_n(_key):
-        file = os.path.join(out_dir, f'Predict_{model_name}_{predict_file}_chr{_key}.npz')
-        __save_data(res_hic[_key], file)
-
-    if multiprocessing.cpu_count() > 23:
-        pool_num = 23
-    else:
-        pool_num = multiprocessing.cpu_count() - 2
-    pool = multiprocessing.Pool(processes=pool_num)
-    print(f'Start a multiprocess pool with process_num = {pool_num} for saving predicted data')
-    for key in sizes.keys():
-        pool.apply_async(save_data_n, (key,))
-    pool.close()
-    pool.join()
-    print(f'All data saved. Model running cost is {(end - start):.6f} s.')

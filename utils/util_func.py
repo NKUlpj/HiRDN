@@ -68,7 +68,7 @@ def loader(file_name, loader_type='train', padding=False, shuffle=True, batch_si
     __target_tensor = torch.tensor(__target_np, dtype=torch.float)
 
     __inds_np = __file_np['inds']
-    __inds_tensor = torch.tensor(__inds_np, dtype=torch.float)
+    __inds_tensor = torch.tensor(__inds_np, dtype=torch.int)
     print(f"{loader_type} Set Size: {__input_tensor.size()}")
     __dataset = TensorDataset(__input_tensor, __target_tensor, __inds_tensor)
     __data_loader = DataLoader(__dataset, batch_size=batch_size, shuffle=shuffle, drop_last=True)
