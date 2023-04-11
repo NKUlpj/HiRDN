@@ -48,7 +48,7 @@ class ConvMod(nn.Module):
         self.v = nn.Conv2d(channels, channels, 1)
         self.proj = nn.Conv2d(channels, channels, 1)
         self.layer_scale = nn.Parameter(
-            layer_scale_init_value * torch.ones((channels)), requires_grad=True)
+            layer_scale_init_value * torch.ones(channels), requires_grad=True)
 
     def forward(self, x):
         r = self.norm(x)
