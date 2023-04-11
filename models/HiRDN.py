@@ -13,12 +13,15 @@ from .HiDB import HiDB
 
 
 class HiRDN(nn.Module):
-    def __init__(self, in_channels=1, hidden_channels=52, out_channels=1, mode='T') -> None:
+    def __init__(self, in_channels=1, out_channels=1, mode='T') -> None:
         super(HiRDN, self).__init__()
+        _config = get_config(mode)
+        hidden_channels = _config['HiRDN'][0]
+        _block_num = _config['HiRDN'][1]
+
         self.fea_conv = conv_layer(in_channels, hidden_channels, kernel_size=3)
         self.hidb_group = nn.ModuleList()
-        _config = get_config(mode)
-        _block_num = _config['HiRDN']
+
         for _ in range(_block_num):
             self.hidb_group.append(
                 HiDB(channels=hidden_channels, mode=mode)

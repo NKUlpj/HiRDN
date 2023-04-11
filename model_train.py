@@ -156,7 +156,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs):
             best_ssim = this_ssim
             print(
                 f'Update SSIM ===> '
-                f'PSNR: {this_psnr:.6f} dB; SSIM: {this_ssim:.6f}; LPIPS: {this_lpips:.6f}; DISTS: {this_dists:.6f}')
+                f'PSNR: {this_psnr:.6f} dB; SSIM: {this_ssim:.6f}; LPIPS: {this_lpips:.6f}; DISTS: {this_dists:.6f};')
             torch.save(net.state_dict(), best_ckpt)
 
         # get this epoch score， 每个batch相加 除以batch总数，得到这个周期的平均值

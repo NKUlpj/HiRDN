@@ -31,7 +31,7 @@ class ResidualUnit(nn.Module):
                 nn.Conv2d(hidden_channels, hidden_channels, 3, padding='same', bias=bias)
             )
         self.expansion = nn.Conv2d(hidden_channels, out_channels, _kernel_size, padding='same', bias=bias)
-        self.act = nn.LeakyReLU(inplace=True)
+        # self.act = nn.LeakyReLU(inplace=True)
 
     def forward(self, x):
         x1 = self.reduction(x)

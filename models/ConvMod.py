@@ -38,18 +38,17 @@ class LayerNorm(nn.Module):
 class ConvMod(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        hidden_channels = channels
         layer_scale_init_value = 1e-6
-        self.norm = LayerNorm(hidden_channels, eps=1e-6, data_format='channels_first')
+        self.norm = LayerNorm(channels, eps=1e-6, data_format='channels_first')
         self.a = nn.Sequential(
-            nn.Conv2d(hidden_channels, hidden_channels, 1),
+            nn.Conv2d(channels, channels, 1),
             nn.GELU(),
-            nn.Conv2d(hidden_channels, hidden_channels, 11, padding=5, groups=hidden_channels)
+            nn.Conv2d(channels, channels, 13, padding=6, groups=channels) # n - k + 2p + 1 = n
         )
-        self.v = nn.Conv2d(hidden_channels, hidden_channels, 1)
-        self.proj = nn.Conv2d(hidden_channels, hidden_channels, 1)
+        self.v = nn.Conv2d(channels, channels, 1)
+        self.proj = nn.Conv2d(channels, channels, 1)
         self.layer_scale = nn.Parameter(
-            layer_scale_init_value * torch.ones((hidden_channels)), requires_grad=True)
+            layer_scale_init_value * torch.ones((channels)), requires_grad=True)
 
     def forward(self, x):
         r = self.norm(x)

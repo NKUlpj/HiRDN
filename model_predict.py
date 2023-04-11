@@ -37,7 +37,7 @@ def __data_info(data):
 
 def __model_predict(model, _loader, ckpt_file):
     device = get_device()
-    lpips_fn = lpips.LPIPS(net='alex')
+    lpips_fn = lpips.LPIPS(net='alex', verbose=False)
     lpips_fn.to(device)
     dists_fn = DISTS()
     dists_fn.to(device)
@@ -49,7 +49,7 @@ def __model_predict(model, _loader, ckpt_file):
     res_inds = []
     net.eval()
     val_res = {'g_loss': 0, 'mse': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0, 'lpips': 0, 'dists': 0, 'samples': 0}
-    predict_bar = tqdm(loader, colour='#178069', desc="Predicting:")
+    predict_bar = tqdm(_loader, colour='#178069', desc="Predicting:")
     with torch.no_grad():
         for batch in predict_bar:
             lr, hr, inds = batch
@@ -85,7 +85,7 @@ def __model_predict(model, _loader, ckpt_file):
     this_lpips = val_res['lpips'] / val_res['samples']
     this_dists = val_res['dists'] / val_res['samples']
     print(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f}; '
-          f'LPIPS:{this_lpips:.6f}; DISTS:{this_dists:.6f}')
+          f'LPIPS:{this_lpips:.6f}; DISTS:{this_dists:.6f};')
     return res_hic
 
 
@@ -99,7 +99,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     in_dir = os.path.join(root_dir, 'data')
     predict_file_path = os.path.join(in_dir, predict_file)
     predict_data_np = np.load(predict_file_path, allow_pickle=True)
-    predict_loader = loader(predict_file_path, 'predict', _padding, False, _batch_size)
+    predict_loader = loader(predict_file, 'predict', _padding, False, _batch_size)
 
     # 3) Load ckpt
     best_ckpt_file = os.path.join(root_dir, 'checkpoints', ckpt)

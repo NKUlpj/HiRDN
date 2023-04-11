@@ -30,19 +30,19 @@ class HiDB(nn.Module):
 
         self.c4 = conv_layer(self.remaining_channels, self.dc, 3)
         self.act = get_act_fn('lrelu', neg_slope=0.05)
-        self.c5 = conv_layer(self.dc * 2, channels, 1)
-
+        self.conv_group = nn.ModuleList()
+        self.conv_group.append(conv_layer(self.dc * 2, channels, 1))
         _config = get_config(mode)
         _hidb = _config['HiDB']
         if _hidb == 'HiCBAM':
             # print("HiDB using HiCBAM")
-            self.attn = HiCBAM(channels=channels)
+            self.conv_group.append(HiCBAM(channels=channels))
         elif _hidb == 'ConvMod':
             # print("HiDB using ConvMod")
-            self.attn = ConvMod(channels=channels)
-        else:
+            self.conv_group.append(ConvMod(channels=channels))
+        elif _hidb == 'ESA':
             # print("HiDB using ESA")
-            self.attn = ESA(channels, nn.Conv2d)
+            self.conv_group.append(ESA(channels, nn.Conv2d))
         self.hifm = HiFM(channels, mode=mode)
 
     def forward(self, x):
@@ -59,5 +59,7 @@ class HiDB(nn.Module):
         r_c4 = self.act(self.c4(r_c3))
 
         out = torch.cat([distilled_c1, r_c4], dim=1)
-        out_fused = self.attn(self.c5(out))
-        return out_fused
+        for conv in self.conv_group:
+            out = conv(out)
+        # out_fused = self.attn(self.c5(out))
+        return out
