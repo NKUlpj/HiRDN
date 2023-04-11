@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：evaluating.py
-@Author ：nkul
-@Date ：2023/4/10 下午2:01
+@Project: HiRDN
+@File: evaluating.py
+@Author: nkul
+@Date: 2023/4/10 下午2:01
 """
 
 

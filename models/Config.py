@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN 
-@File ：Config.py.py
-@Author ：nkul
-@Date ：2023/4/10 下午4:34 
+@Project: HiRDN
+@File: Config.py.py
+@Author: nkul
+@Date: 2023/4/10 下午4:34
 """
 
 # Model_T [Tiny]
@@ -18,7 +18,7 @@ __T = {
     'HiRDN': [48, 4],
     'HiDB': 'None',
     'HiFM': 'None',
-    'RU': [2, 3, 0]  # reduction_ratio, kernel size, block num
+    'RU': [4, 3, 0]  # reduction_ratio, kernel size, block num
 }
 
 # Model_S [Small]

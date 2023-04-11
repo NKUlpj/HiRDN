@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：LKA.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:46
+@Project: HiRDN
+@File: LKA.py
+@Author: nkul
+@Date: 2023/4/10 下午1:46
 see Reference [Visual Attention Network]
 """
 import torch

@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：HiCNN.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:34
+@Project: HiRDN
+@File: HiCNN.py
+@Author: nkul
+@Date: 2023/4/10 下午1:34
 """
 # Code was taken from http://dna.cs.miami.edu/HiCNN2/
 import torch

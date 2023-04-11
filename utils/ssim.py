@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：ssim.py
-@Author ：nkul
-@Date ：2023/4/10 下午12:50
+@Project: HiRDN
+@File: ssim.py
+@Author: nkul
+@Date: 2023/4/10 下午12:50
 # Code was taken from https://github.com/OluwadareLab/HiCARN/
 """
 

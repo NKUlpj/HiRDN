@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN 
-@File ：HiDB.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:49 
+@Project: HiRDN
+@File: HiDB.py
+@Author: nkul
+@Date: 2023/4/10 下午1:49
 """
 
 import torch

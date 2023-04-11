@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：HiRDN_Loss.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:58
+@Project: HiRDN
+@File: HiRDN_Loss.py
+@Author: nkul
+@Date: 2023/4/10 下午1:58
 """
 import torch
 import torch.nn as nn

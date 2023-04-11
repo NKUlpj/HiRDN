@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN 
-@File ：model_predict.py
-@Author ：nkul
-@Date ：2023/4/10 下午2:12 
+@Project: HiRDN
+@File: model_predict.py
+@Author: nkul
+@Date: 2023/4/10 下午2:12
 """
 import os
 import time

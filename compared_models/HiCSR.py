@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN 
-@File ：HiCSR.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:37 
+@Project: HiRDN
+@File: HiCSR.py
+@Author: nkul
+@Date: 2023/4/10 下午1:37
 """
 
 # Code was taken from https://github.com/PSI-Lab/HiCSR

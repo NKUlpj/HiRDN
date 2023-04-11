@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：ECA.py
-@Author ：nkul
-@Date ：2023/4/10 下午4:10
+@Project: HiRDN
+@File: ECA.py
+@Author: nkul
+@Date: 2023/4/10 下午4:10
 See Reference ECA-NET
 """
 import torch

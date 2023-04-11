@@ -1,14 +1,13 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN 
-@File ：util_func.py
-@Author ：nkul
-@Date ：2023/4/10 下午2:07 
+@Project: HiRDN
+@File: util_func.py
+@Author: nkul
+@Date: 2023/4/10 下午2:07
 """
 
 
 import os
-import time
 
 import numpy as np
 import torch

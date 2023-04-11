@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：read_prepare.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:08
+@Project: HiRDN
+@File: read_prepare.py
+@Author: nkul
+@Date: 2023/4/10 下午1:08
 
 A tool to read raw data from Rao's Hi-C experiment
 In root dir(eg. Datasets_NPZ), your file must be like below

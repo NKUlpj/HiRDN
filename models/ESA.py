@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：ESA.py
-@Author ：nkul
-@Date ：2023/4/10 下午4:09
+@Project: HiRDN
+@File: ESA.py
+@Author: nkul
+@Date: 2023/4/10 下午4:09
 # Code copy from https://github.com/njulj/RFDN/blob/master/block.py
 """
 import torch.nn as nn

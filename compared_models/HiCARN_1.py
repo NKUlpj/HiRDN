@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：HiCARN_1.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:21
+@Project: HiRDN
+@File: HiCARN_1.py
+@Author: nkul
+@Date: 2023/4/10 下午1:21
 """
 
 

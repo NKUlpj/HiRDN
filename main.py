@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：main.py
-@Author ：nkul
-@Date ：2023/4/10 下午2:00
+@Project: HiRDN
+@File: main.py
+@Author: nkul
+@Date: 2023/4/10 下午2:00
 """
 
 if __name__ == '__main__':

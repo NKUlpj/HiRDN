@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：down_sample.py
-@Author ：nkul
-@Date ：2023/4/10 下午12:53
+@Project: HiRDN
+@File: down_sample.py
+@Author: nkul
+@Date: 2023/4/10 下午12:53
 
 A tools to down sample data from high resolution data.
 """

@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：split.py
-@Author ：nkul
-@Date ：2023/4/10 下午1:00
+@Project: HiRDN
+@File: split.py
+@Author: nkul
+@Date: 2023/4/10 下午1:00
 """
 
 import sys

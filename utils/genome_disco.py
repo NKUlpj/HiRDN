@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：genome_disco.py
-@Author ：nkul
-@Date ：2023/4/10 下午12:41
+@Project: HiRDN
+@File: genome_disco.py
+@Author: nkul
+@Date: 2023/4/10 下午12:41
 # Code taken from https://github.com/kundajelab/genomedisco
 """
 

@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：visualization.py
-@Author ：nkul
-@Date ：2023/4/10 下午4:19
+@Project: HiRDN
+@File: visualization.py
+@Author: nkul
+@Date: 2023/4/10 下午4:19
 """
 
 import matplotlib.pyplot as plt

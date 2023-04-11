@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN
-@File ：io_helper.py
-@Author ：nkul
-@Date ：2023/4/10 下午12:42
+@Project: HiRDN
+@File: io_helper.py
+@Author: nkul
+@Date: 2023/4/10 下午12:42
 # Some Code was taken from https://github.com/omegahh/DeepHiC
 """
 

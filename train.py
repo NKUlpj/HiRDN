@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project ：HiRDN 
-@File ：train.py
-@Author ：nkul
-@Date ：2023/4/10 下午2:00 
+@Project: HiRDN
+@File: train.py
+@Author: nkul
+@Date: 2023/4/10 下午2:00
 """
 import sys
 from utils.parser_helper import *
