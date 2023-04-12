@@ -9,7 +9,7 @@ import torch.nn as nn
 
 
 class BottleNeck(nn.Module):
-    def __init__(self, channels, ratio):
+    def __init__(self, channels, ratio=2):
         super(BottleNeck, self).__init__()
         hidden_channels = channels // ratio
         self.net = nn.Sequential(

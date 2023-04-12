@@ -9,6 +9,7 @@
 import torch
 import torch.nn as nn
 
+from .BottleNeck import BottleNeck
 from .Config import get_config
 from .RU import ResidualUnit
 from .HiFM import HiFM
@@ -16,7 +17,7 @@ from .Common import *
 
 
 class HiDB(nn.Module):
-    def __init__(self, channels, mode) -> None:
+    def __init__(self, channels, mode='T') -> None:
         super(HiDB, self).__init__()
         self.dc = self.distilled_channels = channels // 2
         self.rc = self.remaining_channels = channels
@@ -24,6 +25,9 @@ class HiDB(nn.Module):
         self.c1_r = ResidualUnit(channels, channels, mode=mode)
         self.c2_r = ResidualUnit(channels, channels, mode=mode)
         self.c3_r = ResidualUnit(channels, channels, mode=mode)
+        # self.c1_r = BottleNeck(channels, 2)
+        # self.c2_r = BottleNeck(channels, 2)
+        # self.c3_r = BottleNeck(channels, 2)
 
         self.c4 = conv_layer(self.remaining_channels, self.dc, 3)
         self.act = get_act_fn('lrelu', neg_slope=0.05)

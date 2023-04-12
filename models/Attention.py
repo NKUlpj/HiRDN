@@ -6,10 +6,14 @@
 @Date: 2023/4/12 下午3:05
 Attention Module
 """
+import time
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+from torch.distributions.normal import Normal
 
 
 # Rewrite Layer Norm, see issue ConvNeXt
@@ -91,7 +95,7 @@ class ESA(nn.Module):
     CCA Layer, spatial attention
     Code copy from https://github.com/njulj/RFDN/blob/master/block.py
     """
-    def __init__(self, channels, conv):
+    def __init__(self, channels, conv=nn.Conv2d):
         super(ESA, self).__init__()
         f = channels // 4
         self.conv1 = conv(channels, f, kernel_size=1)
@@ -123,7 +127,7 @@ class ESA(nn.Module):
 class ConvMod(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        layer_scale_init_value = 1e-6
+        layer_scale_init_value = 1e-2
         self.norm = LayerNorm(channels, eps=1e-6, data_format='channels_first')
         self.a = nn.Sequential(
             nn.Conv2d(channels, channels, 1),
@@ -192,3 +196,79 @@ class ChannelWiseSpatialAttention(nn.Module):
         r = self.proj_2(r)
         return x + r
 
+
+class PRMLayer(nn.Module):
+    def __init__(self, groups=52, mode='dot_product'):
+        super(PRMLayer, self).__init__()
+        self.mode = mode
+        self.groups = groups
+        self.max_pool = nn.AdaptiveMaxPool2d(1, return_indices=True)
+        self.weight = nn.Parameter(torch.zeros(1, self.groups, 1, 1))
+        self.bias = nn.Parameter(torch.ones(1, self.groups, 1, 1))
+        self.sig = nn.Sigmoid()
+        self.gap = nn.AdaptiveAvgPool2d(1)
+        self.one = nn.Parameter(torch.ones(1, self.groups, 1))
+        self.zero = nn.Parameter(torch.zeros(1, self.groups, 1))
+        self.theta = nn.Parameter(torch.rand(1, 2, 1, 1))
+        self.scale = nn.Parameter(torch.ones(1))
+
+    def forward(self, x):
+        b, c, h, w = x.size()
+        position_mask = self.get_position_mask(x, b, h, w, self.groups)
+        # Similarity function
+        query_value, query_position = self.get_query_position(x, self.groups)  # shape [b*num,2,1,1]
+        # print(query_position.float()/h)
+        query_value = query_value.view(b*self.groups, -1, 1)
+        x_value = x.view(b * self.groups, -1, h * w)
+        similarity_max = self.get_similarity(x_value, query_value, mode=self.mode)
+        similarity_gap = self.get_similarity(x_value, self.gap(x).view(b * self.groups, -1, 1), mode=self.mode)
+        similarity_max = similarity_max.view(b, self.groups, h * w)
+        distance = abs(position_mask - query_position)
+        distance = distance.type(query_value.type())
+        # distance = torch.exp(-distance * self.theta)
+        distribution = Normal(0, self.scale)
+        distance = distribution.log_prob(distance * self.theta).exp().clone()
+        distance = (distance.mean(dim=1)).view(b, self.groups, h * w)
+        # print_dis = distance.mean(dim=0).mean(dim=0).view(h, w)
+        # np.savetxt(time.perf_counter().__str__()+'.txt', print_dis.detach().cpu().numpy())
+        similarity_max = similarity_max*distance
+        similarity_gap = similarity_gap.view(b, self.groups, h*w)
+        similarity = similarity_max*self.zero+similarity_gap*self.one
+        context = similarity - similarity.mean(dim=2, keepdim=True)
+        std = context.std(dim=2, keepdim=True) + 1e-5
+        context = (context/std).view(b, self.groups, h, w)
+        # affine function
+        context = context * self.weight + self.bias
+        context = context.view(b*self.groups, 1, h, w)\
+            .expand(b*self.groups, c//self.groups, h, w).reshape(b, c, h, w)
+        value = x*self.sig(context)
+
+        return value
+
+    @staticmethod
+    def get_position_mask(x, b, h, w, number):
+        mask = (x[0, 0, :, :] != 2020).nonzero()
+        mask = (mask.reshape(h, w, 2)).permute(2, 0, 1).expand(b*number, 2, h, w)
+        return mask
+
+    def get_query_position(self, query, groups):
+        b, c, h, w = query.size()
+        value = query.view(b*groups, c//groups, h, w)
+        value = value.sum(dim=1, keepdim=True)
+        max_value, max_position = self.max_pool(value)
+        t_position = torch.cat((max_position//w, max_position % w), dim=1)
+        t_value = value[torch.arange(b*groups), :, t_position[:, 0, 0, 0], t_position[:, 1, 0, 0]]
+        t_value = t_value.view(b, c, 1, 1)
+        return t_value, t_position
+
+    @staticmethod
+    def get_similarity(query, key_value, mode='dot_product'):
+        if mode == 'dot_product':
+            similarity = torch.matmul(key_value.permute(0, 2, 1), query).squeeze(dim=1)
+        elif mode == 'l1norm':
+            similarity = -(abs(query - key_value)).sum(dim=1)
+        elif mode == 'cosine':
+            similarity = torch.cosine_similarity(query, key_value, dim=1)
+        else:
+            similarity = torch.matmul(key_value.permute(0, 2, 1), query)
+        return similarity

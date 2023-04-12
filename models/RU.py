@@ -12,7 +12,7 @@ from .Config import get_config
 
 
 class ResidualUnit(nn.Module):
-    def __init__(self, in_channels, out_channels, mode, bias=True) -> None:
+    def __init__(self, in_channels, out_channels, mode='T', bias=True) -> None:
         super(ResidualUnit, self).__init__()
         '''
         in:         [C * W * H]
@@ -39,4 +39,4 @@ class ResidualUnit(nn.Module):
         for conv in self.conv_group:
             x0, x1 = x1,  conv(x0 + x1)
         res = self.expansion(x0 + x1)
-        return x + res
+        return res  # residual is outside

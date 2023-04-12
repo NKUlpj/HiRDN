@@ -13,7 +13,7 @@ from .Common import get_attn_by_name
 
 
 class HiFM(nn.Module):
-    def __init__(self, channels, mode, k=2) -> None:
+    def __init__(self, channels, mode='T', k=2) -> None:
         super(HiFM, self).__init__()
         self.k = k
         self.net = nn.Sequential(
