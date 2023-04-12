@@ -13,7 +13,7 @@ __T = {
     'HiDB': 'None',
     'HiFM': 'None',
     'RU': [4, 3, 0],  # reduction_ratio, kernel size, block num
-    'Loss': [0.0005, 0.0003, 0.0002, 0.01, 1]  # perception_loss, dists_loss, image_loss
+    'Loss': [0.01, 0.00003, 0.0002, 0.05, 1]  # perception_loss, dists_loss, image_loss
 }
 
 # Model_S [Small]

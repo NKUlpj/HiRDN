@@ -5,6 +5,7 @@
 @Author: nkul
 @Date: 2023/4/10 下午1:58
 """
+import numpy as np
 import torch
 import torch.nn as nn
 from torchvision.models.vgg import vgg16
@@ -12,7 +13,6 @@ from DISTS_pytorch import DISTS
 import warnings
 
 from models.Config import get_config
-
 warnings.filterwarnings("ignore")
 
 
@@ -30,7 +30,7 @@ class GeneratorLoss(nn.Module):
                 param.requires_grad = False
             loss_networks.append(loss_network)
         self.loss_networks = loss_networks
-        self.mse_loss = nn.MSELoss()
+        self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
         self.l1_loss = nn.L1Loss()
         self.dists_loss = DISTS()
 
@@ -40,8 +40,8 @@ class GeneratorLoss(nn.Module):
             _loss_network.to(self.device)
             _out_feat = _loss_network(out_images.repeat([1, 3, 1, 1]))
             _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
-            perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat.reshape(
-                _out_feat.size(0), -1), _target_feat.reshape(_target_feat.size(0), -1))
+            perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         image_loss = self.l1_loss(out_images, target_images)
         dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
+        # dists_loss: 0.3756; image_loss: .0298; perception_loss: 0.0016;
         return self.loss_weights[-2] * dists_loss + self.loss_weights[-1] * image_loss + perception_loss

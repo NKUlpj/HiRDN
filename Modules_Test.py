@@ -13,8 +13,8 @@ from models.Attention import *
 if __name__ == '__main__':
     _input = torch.randn(1, 64, 64, 64)
     # net = HiRDN()
-    # net = BottleNeck(channels=64, ratio=2)
-    net = PRMLayer(groups=64)
+    net = LKA(channels=64)
+    # net = PRMLayer(groups=64)
     log_info = f"Model parameter number: {sum(p.numel() for p in net.parameters() if p.requires_grad)}"
     print(log_info)
     _output = net(_input)
