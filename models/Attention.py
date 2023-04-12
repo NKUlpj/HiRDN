@@ -214,7 +214,7 @@ class PRMLayer(nn.Module):
 
     def forward(self, x):
         b, c, h, w = x.size()
-        position_mask = self.get_position_mask(x, b, h, w, self.groups)
+        position_mask = self.get_position_mask(x, b, h, w, self.groups)  # batch * group, 2, 64, 64
         # Similarity function
         query_value, query_position = self.get_query_position(x, self.groups)  # shape [b*num,2,1,1]
         # print(query_position.float()/h)

@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 
 from .Config import get_config
+from .Scale import Scale
 
 
 class ResidualUnit(nn.Module):
@@ -32,6 +33,8 @@ class ResidualUnit(nn.Module):
             )
         self.expansion = nn.Conv2d(hidden_channels, out_channels, _kernel_size, padding='same', bias=bias)
         # self.act = nn.LeakyReLU(inplace=True)
+        self.scale1 = Scale(1e-6)
+        self.scale2 = Scale(1)
 
     def forward(self, x):
         x1 = self.reduction(x)
@@ -39,4 +42,4 @@ class ResidualUnit(nn.Module):
         for conv in self.conv_group:
             x0, x1 = x1,  conv(x0 + x1)
         res = self.expansion(x0 + x1)
-        return res  # residual is outside
+        return self.scale1(res) + self.scale2(x)  # residual is outside

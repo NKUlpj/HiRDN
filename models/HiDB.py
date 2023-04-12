@@ -42,14 +42,18 @@ class HiDB(nn.Module):
 
     def forward(self, x):
         distilled_c1 = self.act(self.hifm(x))
-        r_c1 = (self.c1_r(x))
-        r_c1 = self.act(r_c1 + x)
 
-        r_c2 = (self.c2_r(r_c1))
-        r_c2 = self.act(r_c2 + r_c1)
+        # r_c1 = (self.c1_r(x))
+        # r_c1 = self.act(r_c1 + x)
+        r_c1 = self.act(self.c1_r(x))
 
-        r_c3 = (self.c3_r(r_c2))
-        r_c3 = self.act(r_c3 + r_c2)
+        # r_c2 = (self.c2_r(r_c1))
+        # r_c2 = self.act(r_c2 + r_c1)
+        r_c2 = self.act(self.c2_r(r_c1))
+
+        # r_c3 = (self.c3_r(r_c2))
+        # r_c3 = self.act(r_c3 + r_c2)
+        r_c3 = self.act(self.c3_r(r_c2))
 
         r_c4 = self.act(self.c4(r_c3))
 
