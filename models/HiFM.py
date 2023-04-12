@@ -9,31 +9,23 @@ import torch
 import torch.nn as nn
 
 from .Config import get_config
-from .LKA import ChannelWiseSpatialAttention
-from .CA import CA
+from .Common import get_attn_by_name
 
 
 class HiFM(nn.Module):
-    def __init__(self, channels, k=2, mode='T') -> None:
+    def __init__(self, channels, mode, k=2) -> None:
         super(HiFM, self).__init__()
         self.k = k
         self.net = nn.Sequential(
             nn.AvgPool2d(kernel_size= self.k, stride=self.k),
             nn.Upsample(scale_factor=self.k, mode='nearest')
         )
-        _config = get_config(mode)
-        _hifm = _config['HiFM']
         self.conv_group = nn.ModuleList()
-        if _hifm == 'CA':
-            # print("HiFM using CA")
-            self.conv_group.append(
-                CA(channels=channels * 2)
-            )
-        elif _hifm == 'CWSA':
-            # print("HiFM using CWSA")
-            self.conv_group.append(
-                ChannelWiseSpatialAttention(channels=channels * 2)
-            )
+        _config = get_config(mode)
+        _attn_name = _config['HiFM']
+        _attn = get_attn_by_name(_attn_name, channels * 2)
+        if _attn is not None:
+            self.conv_group.append(_attn)
         self.conv_group.append(
             nn.Conv2d(channels * 2, channels // 2, 1, padding='same')
         )

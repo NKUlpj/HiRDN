@@ -12,7 +12,7 @@ from .Config import get_config
 
 
 class ResidualUnit(nn.Module):
-    def __init__(self, in_channels, out_channels, bias=True, mode='T') -> None:
+    def __init__(self, in_channels, out_channels, mode, bias=True) -> None:
         super(ResidualUnit, self).__init__()
         '''
         in:         [C * W * H]

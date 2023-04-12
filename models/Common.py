@@ -8,6 +8,7 @@
 
 import torch.nn as nn
 from collections import OrderedDict
+from models.Attention import *
 
 
 # private func
@@ -79,6 +80,23 @@ def get_act_fn(act_type, inplace=True, neg_slope=0.05, n_prelu=1):
 
 
 # public func
+def get_attn_by_name(name, channels):
+    if name == 'ConvMod':
+        return ConvMod(channels)
+    elif name == 'CA':
+        return CA(channels)
+    elif name == 'CWSA':
+        return ChannelWiseSpatialAttention(channels)
+    elif name == 'HiCBAM':
+        return HiCBAM(channels)
+    elif name == 'ESA':
+        return ESA(channels, nn.Conv2d)
+    elif name == 'None':
+        return None
+    else:
+        raise NotImplementedError('Attention layer [{:s}] is not found'.format(name))
+
+
 def conv_layer(in_channels, out_channels, kernel_size, stride=1, dilation=1, groups=1):
     r"""
     func   -  auto calculate padding,

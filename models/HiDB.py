@@ -10,16 +10,13 @@ import torch
 import torch.nn as nn
 
 from .Config import get_config
-from .HiCBAM import HiCBAM
 from .RU import ResidualUnit
 from .HiFM import HiFM
 from .Common import *
-from .ConvMod import ConvMod
-from .ESA import ESA
 
 
 class HiDB(nn.Module):
-    def __init__(self, channels, mode='T') -> None:
+    def __init__(self, channels, mode) -> None:
         super(HiDB, self).__init__()
         self.dc = self.distilled_channels = channels // 2
         self.rc = self.remaining_channels = channels
@@ -33,16 +30,10 @@ class HiDB(nn.Module):
         self.conv_group = nn.ModuleList()
         self.conv_group.append(conv_layer(self.dc * 2, channels, 1))
         _config = get_config(mode)
-        _hidb = _config['HiDB']
-        if _hidb == 'HiCBAM':
-            # print("HiDB using HiCBAM")
-            self.conv_group.append(HiCBAM(channels=channels))
-        elif _hidb == 'ConvMod':
-            # print("HiDB using ConvMod")
-            self.conv_group.append(ConvMod(channels=channels))
-        elif _hidb == 'ESA':
-            # print("HiDB using ESA")
-            self.conv_group.append(ESA(channels, nn.Conv2d))
+        _attn_name = _config['HiDB']
+        _attn = get_attn_by_name(_attn_name, channels)
+        if _attn is not None:
+            self.conv_group.append(_attn)
         self.hifm = HiFM(channels, mode=mode)
 
     def forward(self, x):

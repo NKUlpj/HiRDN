@@ -68,7 +68,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs):
     # step 3: load loss
     if model_name == 'HiRDN':
         print("Using HiRDN_Loss")
-        criterion = HiRDN_Loss.GeneratorLoss().to(device)
+        criterion = HiRDN_Loss.GeneratorLoss(device=device).to(device)
     elif model_name == 'DeepHiC':
         print('Using DeepHiC Loss')
         criterion = DeepHiC_Loss.GeneratorLoss().to(device)
