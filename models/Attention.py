@@ -242,7 +242,6 @@ class PRMLayer(nn.Module):
         context = context.view(b*self.groups, 1, h, w)\
             .expand(b*self.groups, c//self.groups, h, w).reshape(b, c, h, w)
         value = x*self.sig(context)
-
         return value
 
     @staticmethod

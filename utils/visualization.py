@@ -40,7 +40,7 @@ def __plot_hic(matrix_data, v_max, colors=None):
     sns.heatmap(
         matrix_data.T,
         vmax=v_max,
-        vmin=0,
+        vmin=0.05,
         xticklabels=[],
         yticklabels=[],
         cmap=my_cmap,
@@ -62,3 +62,13 @@ def plot_hic(matrix, start, end, _percentile=95, name=None):
         plt.title(name)
         plt.savefig(f'{name}.png')
     plt.show()
+
+
+def plot_hic_matrix(_matrix, name):
+    v_min = np.min(_matrix)
+    _matrix = _matrix + abs(v_min)
+    v_max = np.max(_matrix)
+    print(v_min, v_max)
+    __plot_hic(_matrix, 0.8, colors=['white', 'black'])
+    # plt.show()
+    plt.savefig(f'{name}')

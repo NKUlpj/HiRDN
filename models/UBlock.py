@@ -14,17 +14,14 @@ import torch.nn as nn
 class DenseBlock(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        self.conv1 = nn.Conv2d(channels, channels, 1)
-        self.conv2 = nn.Conv2d(channels, channels, 3, padding='same')
-        # self.conv3 = nn.Conv2d(channels, channels, 1)
-        # self.conv4 = nn.Conv2d(channels, channels, 3, padding='same')
+        self.net = nn.Sequential(
+            nn.Conv2d(channels, channels, 3, padding='same'),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(channels, channels, 3, padding='same')
+        )
 
     def forward(self, x):
-        x1 = self.conv1(x)
-        x2 = self.conv2(x + x1)
-        # x3 = self.conv3(x + x1 + x2)
-        # x4 = self.conv4(x + x1 + x2 + x3)
-        return x + x1 + x2  # + x3 + x4
+        return self.net(x) + x
 
 
 class UBlock(nn.Module):
