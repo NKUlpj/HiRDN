@@ -113,4 +113,3 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     # 5） return, put save code in main func as multiprocess must be created in main
     sizes = __data_info(predict_data_np)
     return res_hic, sizes
-

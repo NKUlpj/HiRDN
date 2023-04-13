@@ -46,7 +46,3 @@ if __name__ == '__main__':
         pool.apply_async(save_data_n, (key,))
     pool.close()
     pool.join()
-
-
-
-

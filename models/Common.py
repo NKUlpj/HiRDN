@@ -5,8 +5,6 @@
 @Author: nkul
 @Date: 2023/4/10 下午1:50
 """
-
-import torch.nn as nn
 from collections import OrderedDict
 from models.Attention import *
 

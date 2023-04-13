@@ -54,23 +54,22 @@ class UBlock(nn.Module):
 
         self.layer_3r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_3r_dense = nn.Sequential(
-            DenseBlock(hidden_channels * 2),
-            nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),
+            nn.Conv2d(hidden_channels * 2, hidden_channels, 1),  # reduce channels, kernel size 3 or 1 ?
+            DenseBlock(hidden_channels),
             nn.ReLU(inplace=True)
         )
 
         self.layer_2r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_2r_dense = nn.Sequential(
-            DenseBlock(hidden_channels * 2),
-            nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),
+            nn.Conv2d(hidden_channels * 2, hidden_channels, 1),
+            DenseBlock(hidden_channels),
             nn.ReLU(inplace=True)
         )
 
         self.layer_1r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_1r = nn.Sequential(
             nn.Conv2d(hidden_channels * 2, hidden_channels, 1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(hidden_channels, hidden_channels, 3, padding='same'),
+            DenseBlock(hidden_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(hidden_channels, out_channels, 1)
         )
@@ -91,5 +90,3 @@ class UBlock(nn.Module):
         x7 = self.layer_1r_up(x6)
         x7 = self.layer_1r(torch.cat([x7, x1], 1))
         return x7
-
-

@@ -6,9 +6,7 @@
 @Date: 2023/4/10 下午1:49
 """
 
-import torch
 import torch.nn as nn
-
 from .BottleNeck import BottleNeck
 from .Config import get_config
 from .RU import ResidualUnit

@@ -6,9 +6,6 @@
 @Date: 2023/4/12 下午3:05
 Attention Module
 """
-import time
-
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

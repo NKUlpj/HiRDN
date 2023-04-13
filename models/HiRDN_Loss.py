@@ -5,8 +5,7 @@
 @Author: nkul
 @Date: 2023/4/10 下午1:58
 """
-import numpy as np
-import torch
+
 import torch.nn as nn
 from torchvision.models.vgg import vgg16
 from DISTS_pytorch import DISTS

@@ -5,7 +5,6 @@
 @Author: nkul
 @Date: 2023/4/10 下午1:56
 """
-import torch
 import torch.nn as nn
 from .Common import *
 from .Config import get_config
