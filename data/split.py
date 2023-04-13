@@ -76,7 +76,7 @@ if __name__ == '__main__':
     for n in chr_list:
         high_file = os.path.join(data_dir, f'chr{n}_{high_res}.npz')
         down_file = os.path.join(data_dir, f'chr{n}_{low_res}.npz')
-        kwargs = {'chunk': chunk, 'stride': stride, 'bound': bound}
+        kwargs = {'_chunk': chunk, '_stride': stride, '_bound': bound}
         res = pool.apply_async(
             data_divider, (n, high_file, down_file,), kwargs)
         results.append(res)
