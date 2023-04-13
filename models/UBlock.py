@@ -54,24 +54,29 @@ class UBlock(nn.Module):
 
         self.layer_3r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_3r_dense = nn.Sequential(
-            nn.Conv2d(hidden_channels * 2, hidden_channels, 1),  # reduce channels, kernel size 3 or 1 ?
+            # reduce channels, kernel size 3 or 1 ?
+            nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),  # should be 3 ? todo
+            nn.ReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
             nn.ReLU(inplace=True)
         )
 
         self.layer_2r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_2r_dense = nn.Sequential(
-            nn.Conv2d(hidden_channels * 2, hidden_channels, 1),
+            nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),
+            nn.ReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
             nn.ReLU(inplace=True)
         )
 
         self.layer_1r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_1r = nn.Sequential(
-            nn.Conv2d(hidden_channels * 2, hidden_channels, 1),
+            nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),
+            nn.ReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(hidden_channels, out_channels, 1)
+            nn.Conv2d(hidden_channels, out_channels, 3, padding='same'),  # kernel size 3 ? todo
+            nn.Sigmoid()  # need sigmod here ? todo
         )
 
     def forward(self, x):
