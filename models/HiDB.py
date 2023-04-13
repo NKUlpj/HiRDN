@@ -17,7 +17,7 @@ from .Common import *
 
 
 class HiDB(nn.Module):
-    def __init__(self, channels, mode='T') -> None:
+    def __init__(self, channels, mode) -> None:
         super(HiDB, self).__init__()
         self.dc = self.distilled_channels = channels // 2
         self.rc = self.remaining_channels = channels

@@ -17,7 +17,7 @@ class HiFM(nn.Module):
         super(HiFM, self).__init__()
         self.k = k
         self.net = nn.Sequential(
-            nn.AvgPool2d(kernel_size= self.k, stride=self.k),
+            nn.AvgPool2d(kernel_size=self.k, stride=self.k),
             nn.Upsample(scale_factor=self.k, mode='nearest')
         )
         self.conv_group = nn.ModuleList()

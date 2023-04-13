@@ -13,7 +13,7 @@ from .Scale import Scale
 
 
 class ResidualUnit(nn.Module):
-    def __init__(self, in_channels, out_channels, mode='T', bias=True) -> None:
+    def __init__(self, in_channels, out_channels, mode, bias=True) -> None:
         super(ResidualUnit, self).__init__()
         '''
         in:         [C * W * H]

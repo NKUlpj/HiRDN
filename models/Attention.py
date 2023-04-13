@@ -272,3 +272,8 @@ class PRMLayer(nn.Module):
         else:
             similarity = torch.matmul(key_value.permute(0, 2, 1), query)
         return similarity
+
+
+class AttentionProducing(nn.Module):
+    def __init__(self):
+        super(AttentionProducing, self).__init__()

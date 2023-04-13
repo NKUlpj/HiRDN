@@ -10,6 +10,7 @@ import torch.nn as nn
 from .Common import *
 from .Config import get_config
 from .HiDB import HiDB
+from .UBlock import UBlock
 
 
 class HiRDN(nn.Module):
@@ -36,6 +37,8 @@ class HiRDN(nn.Module):
         self.LR_conv = conv_layer(_hidden_channels, _hidden_channels, kernel_size=3)
         self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='lrelu')
 
+        self.attn = UBlock(in_channels=1, hidden_channels=52, out_channels=1)
+
     def forward(self, x):
         out_fea = self.fea_conv(x)
         x1 = out_fea.clone()
@@ -55,4 +58,4 @@ class HiRDN(nn.Module):
         out_b = self.c(x1)
         out_lr = self.LR_conv(out_b) + out_fea
         output = self.exit(out_lr)
-        return output
+        return output * self.attn(x)
