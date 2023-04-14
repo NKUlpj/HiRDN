@@ -75,8 +75,8 @@ class UBlock(nn.Module):
             nn.ReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(hidden_channels, out_channels, 3, padding='same'),  # kernel size 3 ? todo
-            nn.Sigmoid()  # need sigmod here ? todo
+            nn.Conv2d(hidden_channels, out_channels, 1, padding='same'),  # kernel size 3, was 1 in U-NET paper? todo
+            nn.Sigmoid()  # need sigmod here ? have this layer in U-NET todo
         )
 
     def forward(self, x):

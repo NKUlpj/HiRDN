@@ -18,8 +18,8 @@ warnings.filterwarnings("ignore")
 class GeneratorLoss(nn.Module):
     def __init__(self, device, mode='T'):
         super(GeneratorLoss, self).__init__()
-        # vgg = vgg16(pretrained=True)
-        vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
+        vgg = vgg16(pretrained=True)
+        # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
         self.loss_weights = get_config(mode)['Loss']
         loss_networks = []
