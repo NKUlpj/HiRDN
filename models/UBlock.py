@@ -17,11 +17,12 @@ class DenseBlock(nn.Module):
         self.net = nn.Sequential(
             nn.Conv2d(channels, channels, 3, padding='same'),
             nn.ReLU(inplace=True),
-            nn.Conv2d(channels, channels, 3, padding='same')
+            nn.Conv2d(channels, channels, 3, padding='same'),
+            nn.ReLU(inplace=True)
         )
 
     def forward(self, x):
-        return self.net(x) + x
+        return self.net(x)
 
 
 class UBlock(nn.Module):
@@ -30,51 +31,44 @@ class UBlock(nn.Module):
         # 1 * h * w ==> c * h * w
         self.layer_1l = nn.Sequential(
             nn.Conv2d(in_channels, hidden_channels, 1),
-            nn.Conv2d(hidden_channels, hidden_channels, 3, padding='same'),
-            nn.ReLU(inplace=True)
+            DenseBlock(hidden_channels),
         )
         # c * h * w => c * h/2 * w/2 (32)
         self.layer_2l = nn.Sequential(
             nn.MaxPool2d(2, 2),  # size/2
             DenseBlock(hidden_channels),
-            nn.ReLU(inplace=True)
         )
         # c * h/2 * w/2 => c * h/4 * w/4 (16)
         self.layer_3l = nn.Sequential(
             nn.AvgPool2d(2, 2),
             DenseBlock(hidden_channels),
-            nn.ReLU(inplace=True)
         )
         # c * h/4 * w/4 => c * h/8 * w/8 (8)
         self.layer_4 = nn.Sequential(
             nn.AvgPool2d(2, 2),
             DenseBlock(hidden_channels),
-            nn.ReLU(inplace=True)
         )
 
         self.layer_3r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_3r_dense = nn.Sequential(
             # reduce channels, kernel size 3 or 1 ?
             nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),  # should be 3 ? todo
-            nn.ReLU(inplace=True),  # need relu here ? todo
+            nn.LeakyReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
-            nn.ReLU(inplace=True)
         )
 
         self.layer_2r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_2r_dense = nn.Sequential(
             nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),
-            nn.ReLU(inplace=True),  # need relu here ? todo
+            nn.LeakyReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
-            nn.ReLU(inplace=True)
         )
 
         self.layer_1r_up = nn.Upsample(scale_factor=2, mode='nearest')
         self.layer_1r = nn.Sequential(
             nn.Conv2d(hidden_channels * 2, hidden_channels, 3, padding='same'),
-            nn.ReLU(inplace=True),  # need relu here ? todo
+            nn.LeakyReLU(inplace=True),  # need relu here ? todo
             DenseBlock(hidden_channels),
-            nn.ReLU(inplace=True),
             nn.Conv2d(hidden_channels, out_channels, 1, padding='same'),  # kernel size 3, was 1 in U-NET paper? todo
             nn.Sigmoid()  # need sigmod here ? have this layer in U-NET todo
         )

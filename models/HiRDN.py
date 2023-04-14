@@ -59,7 +59,7 @@ class HiRDN(nn.Module):
         out_b = self.c(x1)
         out_lr = self.LR_conv(out_b) + out_fea
         output = self.exit(out_lr)
-        if self.attn is None:
-            return output
-        else:
+        if hasattr(self, 'attn') and self.attn is not None:
             return output * self.attn(x)
+        else:
+            return output
