@@ -42,4 +42,4 @@ class ResidualUnit(nn.Module):
         for conv in self.conv_group:
             x0, x1 = x1,  conv(x0 + x1)
         res = self.expansion(x0 + x1)
-        return self.scale1(res) + self.scale2(x)  # residual is outside
+        return self.scale1(res) + self.scale2(x)

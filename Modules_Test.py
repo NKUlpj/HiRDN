@@ -19,7 +19,7 @@ if __name__ == '__main__':
     _input = torch.randn(10, 1, 64, 64)
     # net = HiRDN()
     # # net = LKA(channels=64)
-    net = UBlock(in_channels=1, hidden_channels=64, out_channels=1)
+    net = UBlock(in_channels=1, hidden_channels=16, out_channels=1)
     # # net = PRMLayer(groups=64)
     _output = net(_input)
     print(_output.shape)

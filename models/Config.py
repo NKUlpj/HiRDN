@@ -9,7 +9,7 @@
 
 # Model_T [Tiny]
 __T = {
-    'HiRDN': [48, 6, 1],
+    'HiRDN': [48, 4, 1],
     'HiDB': 'ESA',
     'HiFM': 'CWSA',
     'RU': [2, 3, 0],  # reduction_ratio, kernel size, block num
