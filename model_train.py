@@ -12,6 +12,7 @@ import numpy as np
 from tqdm import tqdm
 import torch
 import torch.optim as optim
+from torch.optim.lr_scheduler import CosineAnnealingLR, CosineAnnealingWarmRestarts
 import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
 import compared_models.DeepHiC_Loss as DeepHiC_Loss
 from models import HiRDN_Loss
@@ -80,11 +81,15 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs):
     dists_fn = DISTS()
     dists_fn.to(device)
 
+    _optimizer = optim.Adam(net.parameters(), lr=1e-4)
+    _scheduler = CosineAnnealingLR(_optimizer, max_epochs)
+
     # step 4: start train
     for epoch in range(1, max_epochs + 1):
         run_res = {'samples': 0, 'g_loss': 0, 'g_score': 0}
-        alr = __adjust_learning_rate(epoch)
-        optimizer = optim.Adam(net.parameters(), lr=alr)
+        # update by @nkul
+        # alr = __adjust_learning_rate(epoch)
+        # optimizer = optim.Adam(net.parameters(), lr=alr)
         # free memory
         for p in net.parameters():
             if p.grad is not None:
@@ -101,11 +106,15 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs):
             net.zero_grad()
             g_loss = criterion(fake_imgs, real_imgs)
             g_loss.backward()
-            optimizer.step()
+            _optimizer.step()
+            # update by @nkul
+            # optimizer.step()
             run_res['g_loss'] += g_loss.item() * batch_size
             train_bar.set_description(
                 desc=f"[{epoch}/{max_epochs}] Loss_G: {run_res['g_loss'] / run_res['samples']:.6f}"
             )
+        # update by @nkul
+        _scheduler.step()
 
         # step 4.2 staring valid
         # val_res 记录所有batch的总和

@@ -38,7 +38,7 @@ class HiRDN(nn.Module):
         self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='lrelu')
         if _att == 1:
             print('HiRDN is using UNet Attention')
-            self.attn = UBlock(in_channels=in_channels, hidden_channels=_hidden_channels, out_channels=out_channels)
+            self.attn = UBlock(in_channels=in_channels, hidden_channels=8, out_channels=out_channels)
 
     def forward(self, x):
         out_fea = self.fea_conv(x)

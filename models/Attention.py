@@ -124,7 +124,7 @@ class ESA(nn.Module):
 class ConvMod(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        layer_scale_init_value = 1e-2
+        layer_scale_init_value = 1e-6
         self.norm = LayerNorm(channels, eps=1e-6, data_format='channels_first')
         self.a = nn.Sequential(
             nn.Conv2d(channels, channels, 1),
@@ -164,7 +164,7 @@ class LKA(nn.Module):
     def __init__(self, channels):
         super(LKA, self).__init__()
         self.conv0 = nn.Conv2d(channels, channels, 5, padding=2, groups=channels)
-        self.conv_spatial = nn.Conv2d(channels, channels, 7, stride=1, padding=9, groups=channels, dilation=3)
+        self.conv_spatial = nn.Conv2d(channels, channels, 11, stride=1, padding='same', groups=channels, dilation=3)
         self.conv1 = nn.Conv2d(channels, channels, 1)
 
     def forward(self, x):

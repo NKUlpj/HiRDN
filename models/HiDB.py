@@ -23,9 +23,6 @@ class HiDB(nn.Module):
         self.c1_r = ResidualUnit(channels, channels, mode=mode)
         self.c2_r = ResidualUnit(channels, channels, mode=mode)
         self.c3_r = ResidualUnit(channels, channels, mode=mode)
-        # self.c1_r = BottleNeck(channels, 2)
-        # self.c2_r = BottleNeck(channels, 2)
-        # self.c3_r = BottleNeck(channels, 2)
 
         self.c4 = conv_layer(self.remaining_channels, self.dc, 3)
         self.act = get_act_fn('lrelu', neg_slope=0.05)
