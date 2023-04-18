@@ -9,11 +9,11 @@
 
 # Model_T [Tiny]
 __T = {
-    'HiRDN': [48, 4, 1],
+    'HiRDN': [48, 5, 1, 8],
     'HiDB': 'ESA',
-    'HiFM': 'CA',
+    'HiFM': 'CWSA',
     'RU': [2, 3, 0],  # reduction_ratio, kernel size, block num
-    'Loss': [0.015, 2e-6, 2e-6, 0.02, 0.9]  # perception_loss[:3], dists_loss, image_loss
+    'Loss': [0.1, 5e-5, 5e-5, 0.01, 0.8]  # perception_loss[:3][0.007, 5, 2], dists_loss, image_loss
 }
 
 # Model_S [Small]
@@ -43,6 +43,3 @@ def get_config(mode):
     if mode not in __model_dict:
         raise NotImplementedError('HiRDN_[{:s}] is not found'.format(mode))
     return __model_dict[mode]
-
-# HiCARN
-#       SSIM:0.931695; PSNR:37.093705; LPIPS:0.035611; Predict: 15.406859

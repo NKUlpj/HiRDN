@@ -18,8 +18,6 @@ class HiRDN(nn.Module):
         _config = get_config(mode)
         _hidden_channels = _config['HiRDN'][0]
         _block_num = _config['HiRDN'][1]
-        _att = _config['HiRDN'][2]
-
         self.fea_conv = conv_layer(in_channels, _hidden_channels, kernel_size=3)
         self.hidb_group = nn.ModuleList()
 
@@ -36,9 +34,11 @@ class HiRDN(nn.Module):
         self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='lrelu')
         self.LR_conv = conv_layer(_hidden_channels, _hidden_channels, kernel_size=3)
         self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='lrelu')
+        _att = _config['HiRDN'][2]
         if _att == 1:
+            _block_channels = _config['HiRDN'][3]
             print('HiRDN is using UNet Attention')
-            self.attn = UBlock(in_channels=in_channels, hidden_channels=8, out_channels=out_channels)
+            self.attn = UBlock(in_channels=in_channels, hidden_channels=_block_channels, out_channels=out_channels)
 
     def forward(self, x):
         out_fea = self.fea_conv(x)
@@ -60,6 +60,6 @@ class HiRDN(nn.Module):
         out_lr = self.LR_conv(out_b) + out_fea
         output = self.exit(out_lr)
         if hasattr(self, 'attn') and self.attn is not None:
-            return output * self.attn(x)
+            return output * self.attn(output)
         else:
             return output

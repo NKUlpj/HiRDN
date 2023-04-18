@@ -13,7 +13,7 @@ import math
 from torch.distributions.normal import Normal
 
 
-# Rewrite Layer Norm, see issue ConvNeXt
+# Rewrite Layer Norm, see the issue in ConvNeXt Repo
 class LayerNorm(nn.Module):
     r""" From ConvNeXt (https://arxiv.org/pdf/2201.03545.pdf)
     """
@@ -163,8 +163,8 @@ class HiCBAM(nn.Module):
 class LKA(nn.Module):
     def __init__(self, channels):
         super(LKA, self).__init__()
-        self.conv0 = nn.Conv2d(channels, channels, 5, padding=2, groups=channels)
-        self.conv_spatial = nn.Conv2d(channels, channels, 11, stride=1, padding='same', groups=channels, dilation=3)
+        self.conv0 = nn.Conv2d(channels, channels, 7, padding='same', groups=channels)
+        self.conv_spatial = nn.Conv2d(channels, channels, 13, stride=1, padding='same', groups=channels, dilation=3)
         self.conv1 = nn.Conv2d(channels, channels, 1)
 
     def forward(self, x):
@@ -268,4 +268,3 @@ class PRMLayer(nn.Module):
         else:
             similarity = torch.matmul(key_value.permute(0, 2, 1), query)
         return similarity
-

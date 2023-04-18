@@ -39,8 +39,11 @@ class GeneratorLoss(nn.Module):
             _loss_network.to(self.device)
             _out_feat = _loss_network(out_images.repeat([1, 3, 1, 1]))
             _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
+            # _this_per_loss = self.mse_loss(_out_feat, _target_feat)
+            # print(idx, _this_per_loss)
             perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         image_loss = self.l1_loss(out_images, target_images)
         dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
-        # dists_loss: 0.3756; image_loss: .0298; perception_loss: 0.0016;
+        # print(image_loss, dists_loss)
         return self.loss_weights[-2] * dists_loss + self.loss_weights[-1] * image_loss + perception_loss
+        # return self.loss_weights[-1] * image_loss + perception_loss
