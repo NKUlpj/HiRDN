@@ -165,3 +165,6 @@ Datasets_NPZ/predict
 Datasets_NPZ/checkpoints
 Datasets_NPZ/logs
 Experimental
+nohup.out
+out.txt
+*.png
