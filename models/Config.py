@@ -9,11 +9,11 @@
 
 # Model_T [Tiny]
 __T = {
-    'HiRDN': [48, 5, 1, 8],
+    'HiRDN': [48, 6, 1, 8],
     'HiDB': 'ESA',
     'HiFM': 'CWSA',
     'RU': [2, 3, 0],  # reduction_ratio, kernel size, block num
-    'Loss': [0.1, 5e-5, 5e-5, 0.01, 0.8]  # perception_loss[:3][0.007, 5, 2], dists_loss, image_loss
+    'Loss': [0.08, 5e-5, 1e-4, 0.05, 0.8]  # perception_loss[:3][0.007, 5, 2], dists_loss, image_loss
 }
 
 # Model_S [Small]

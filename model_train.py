@@ -6,6 +6,7 @@
 @Date: 2023/4/10 下午2:12
 """
 import os
+import random
 import time
 
 import numpy as np
@@ -25,6 +26,22 @@ from DISTS_pytorch import DISTS
 from utils.util_func import get_device, get_model, loader
 import warnings
 warnings.filterwarnings("ignore")
+
+
+def set_up(seed=3407):
+    # xxxx is all you need. 3407 is not a specials number.
+    # The seed is set to ensure that our results can be reproduced.
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+    np.random.seed(seed)
+    random.seed(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.enabled = False
 
 
 def __save_scores(model_name, ssim_scores, psnr_scores, mse_scores, mae_scores):
@@ -48,6 +65,7 @@ def __adjust_learning_rate(epoch):
 
 def __train(model, model_name, train_loader, valid_loader, max_epochs):
     # step 1: initial
+    set_up()
     out_dir = os.path.join(root_dir, 'checkpoints')
     os.makedirs(out_dir, exist_ok=True)
     best_ckpt = os.path.join(out_dir, f'best_{model_name}.pytorch')
@@ -182,6 +200,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs):
 
 def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epochs):
     # step 1: initial
+    set_up()
     out_dir = os.path.join(root_dir, 'checkpoints')
     os.makedirs(out_dir, exist_ok=True)
     best_ckpt = os.path.join(out_dir, f'best_{model_name}.pytorch')

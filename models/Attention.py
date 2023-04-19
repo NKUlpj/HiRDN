@@ -163,8 +163,8 @@ class HiCBAM(nn.Module):
 class LKA(nn.Module):
     def __init__(self, channels):
         super(LKA, self).__init__()
-        self.conv0 = nn.Conv2d(channels, channels, 7, padding='same', groups=channels)
-        self.conv_spatial = nn.Conv2d(channels, channels, 13, stride=1, padding='same', groups=channels, dilation=3)
+        self.conv0 = nn.Conv2d(channels, channels, 11, padding='same', groups=channels)
+        self.conv_spatial = nn.Conv2d(channels, channels, 15, stride=1, padding='same', groups=channels, dilation=3)
         self.conv1 = nn.Conv2d(channels, channels, 1)
 
     def forward(self, x):
