@@ -17,4 +17,5 @@ if __name__ == '__main__':
     valid_file = args.valid_file
     max_epochs = args.epochs
     batch_size = args.batch_size
-    model_train(model_name, train_file, valid_file, max_epochs, batch_size)
+    verbose = (args.verbose == 1)
+    model_train(model_name, train_file, valid_file, max_epochs, batch_size, verbose)

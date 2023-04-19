@@ -273,7 +273,6 @@ def model_train_parser():
         type=int,
         default=50
     )
-
     misc_args.add_argument(
         '-b',
         dest='batch_size',
@@ -281,6 +280,14 @@ def model_train_parser():
         required=False,
         type=int,
         default=32
+    )
+    misc_args.add_argument(
+        '-verbose',
+        dest='verbose',
+        help='Optional: recording in tensorboard',
+        required=False,
+        type=int,
+        default=1
     )
     parser.add_argument(*help_opt[0], **help_opt[1])
     return parser

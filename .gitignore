@@ -162,4 +162,6 @@ Datasets_NPZ/data
 Datasets_NPZ/mat
 Datasets_NPZ/score
 Datasets_NPZ/predict
+Datasets_NPZ/checkpoints
+Datasets_NPZ/logs
 Experimental
