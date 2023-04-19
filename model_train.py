@@ -267,7 +267,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
             # (2) Train generator
             ###########################
             net_g.zero_grad()
-            g_loss = criterion_g(fake_out.mean(), fake_img, real_img)
+            g_loss = criterion_g(fake_img, real_img)
             g_loss.backward()
             optimizer_g.step()
 

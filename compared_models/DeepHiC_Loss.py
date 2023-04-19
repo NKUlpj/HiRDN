@@ -21,7 +21,7 @@ class GeneratorLoss(nn.Module):
         self.mse_loss = nn.MSELoss()
         self.tv_loss = TVLoss()
 
-    def forward(self, out_labels, out_images, target_images):
+    def forward(self, out_images, target_images):
         # Adversarial Loss
         # adversarial_loss = 1 - out_labels
         # Perception Loss

@@ -43,7 +43,7 @@ def get_model(_model_name):
         exit()
 
     elif _model_name == 'DeepHiC':
-        _padding = True
+        _padding = False
         _is_gan = True
         _netG = DeepHiC.Generator(1, in_channel=1, res_block_num=5)
         _netD = DeepHiC.Discriminator(in_channel=1)
