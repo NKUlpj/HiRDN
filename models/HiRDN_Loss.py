@@ -12,6 +12,7 @@ from DISTS_pytorch import DISTS
 import warnings
 
 from models.Config import get_config
+
 warnings.filterwarnings("ignore")
 
 
@@ -23,7 +24,8 @@ class GeneratorLoss(nn.Module):
         self.device = device
         self.loss_weights = get_config(mode)['Loss']
         loss_networks = []
-        for layer in [1, 15, 25]:
+        for layer in [3, 8, 15]:
+            # for layer in [1, 15, 25]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
             for param in loss_network.parameters():
                 param.requires_grad = False
@@ -31,7 +33,7 @@ class GeneratorLoss(nn.Module):
         self.loss_networks = loss_networks
         self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
         self.l1_loss = nn.L1Loss()
-        self.dists_loss = DISTS()
+        # self.dists_loss = DISTS()
 
     def forward(self, out_images, target_images):
         perception_loss = 0
@@ -43,7 +45,7 @@ class GeneratorLoss(nn.Module):
             # print(idx, _this_per_loss)
             perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         image_loss = self.l1_loss(out_images, target_images)
-        dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
+        # dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
         # print(image_loss, dists_loss)
-        return self.loss_weights[-2] * dists_loss + self.loss_weights[-1] * image_loss + perception_loss
-        # return self.loss_weights[-1] * image_loss + perception_loss
+        # return self.loss_weights[-2] * dists_loss + self.loss_weights[-1] * image_loss + perception_loss
+        return self.loss_weights[-1] * image_loss + perception_loss

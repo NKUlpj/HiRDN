@@ -30,7 +30,10 @@ makedir $root_dir/raw
 iii. Download and Unzip your data into the `$root_dir/raw` directory. 
 
 ---
+<details>
+<summary> FILE STRUCTURE </summary>
 After doing that,your dir should be like this
+
 ```
 Datasets_NPZ
 ├── raw
@@ -40,6 +43,7 @@ Datasets_NPZ
 │   ├── GM12878
 │   └── CH12-LX
 ```
+</details>
 <b>Follow the following steps to generate datasets in .npz format:</b>
 
 ### 1. Read the raw data

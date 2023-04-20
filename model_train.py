@@ -5,6 +5,7 @@
 @Author: nkul
 @Date: 2023/4/10 下午2:12
 """
+import math
 import os
 import random
 import time
@@ -339,14 +340,14 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
 
 def model_train(_model_name, _train_file, _valid_file, _max_epochs, _batch_size, _verbose=True):
     # 1) get model
-    net_g, _padding, _is_gan, net_d = get_model(_model_name)
+    net_g, _padding, net_d = get_model(_model_name)
 
     # 2) get loader
     train_loader = loader(_train_file, 'train', _padding, True, _batch_size)
     valid_loader = loader(_valid_file, 'valid', _padding, False, _batch_size)
 
     # 3) train
-    if _is_gan:
+    if net_d is not None:
         __train_gan(net_g, net_d, _model_name, train_loader, valid_loader, _max_epochs, _verbose)
     else:
         __train(net_g, _model_name, train_loader, valid_loader, _max_epochs, _verbose)

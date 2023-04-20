@@ -17,7 +17,9 @@ import torch.nn.functional as F
 import compared_models.HiCARN_1 as HiCARN
 import compared_models.HiCNN as HiCNN
 import compared_models.DeepHiC as DeepHiC
-from models.HiRDN import HiRDN
+import compared_models.HiCSR as HiCSR
+# from models.HiRDN import HiRDN
+import models.HiRDN as HiRDN
 from utils.parser_helper import root_dir
 
 
@@ -25,10 +27,10 @@ from utils.parser_helper import root_dir
 def get_model(_model_name):
     _padding = False
     _netG = None
-    _is_gan = False
     _netD = None
+
     if _model_name == 'HiRDN':
-        _netG = HiRDN()
+        _netG = HiRDN.HiRDN()
 
     elif _model_name == 'HiCARN':
         _netG = HiCARN.Generator(num_channels=64)
@@ -39,18 +41,16 @@ def get_model(_model_name):
 
     elif _model_name == 'HiCSR':
         _padding = True
-        print('todo')
-        exit()
+        _netG = HiCSR.Generator()
+        _netD = HiCSR.Discriminator()
 
     elif _model_name == 'DeepHiC':
         _padding = False
-        _is_gan = True
         _netG = DeepHiC.Generator(1, in_channel=1, res_block_num=5)
         _netD = DeepHiC.Discriminator(in_channel=1)
     else:
-        print('No this Model')
-        exit()
-    return _netG, _padding, _is_gan, _netD
+        raise NotImplementedError('Model {} is not implemented'.format(_model_name))
+    return _netG, _padding, _netD
 
 
 # get data loader

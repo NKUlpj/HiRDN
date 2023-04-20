@@ -90,7 +90,7 @@ def __model_predict(model, _loader, ckpt_file):
 
 def model_predict(model_name, predict_file,  _batch_size, ckpt):
     # 1) Load Model
-    model, _padding, _, _ = get_model(model_name)
+    model, _padding, _, = get_model(model_name)
 
     # 2) Load File
     print(f'Loading predict data: {predict_file}')

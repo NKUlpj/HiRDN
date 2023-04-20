@@ -39,6 +39,8 @@ class HiRDN(nn.Module):
             _block_channels = _config['HiRDN'][3]
             print('HiRDN is using UNet Attention')
             self.attn = UBlock(in_channels=in_channels, hidden_channels=_block_channels, out_channels=out_channels)
+        self.ca = get_attn_by_name('CA', _hidden_channels * _block_num)
+        self.pa = get_attn_by_name('PA', _hidden_channels * _block_num)
 
     def forward(self, x):
         out_fea = self.fea_conv(x)
@@ -48,6 +50,9 @@ class HiRDN(nn.Module):
             x1 = hidb(x1)
             cat_arr.append(x1.clone())
         x1 = torch.cat(cat_arr, dim=1)
+
+        x1 = self.ca(x1)
+        x1 = self.pa(x1)
 
         # out_b1 = self.hidb1(out_fea)
         # out_b2 = self.hidb2(out_b1)

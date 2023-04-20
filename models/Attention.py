@@ -40,7 +40,7 @@ class LayerNorm(nn.Module):
 
 # Basic Channel Attention
 class CA(nn.Module):
-    def __init__(self, channels, reduction=16) -> None:
+    def __init__(self, channels, reduction=8) -> None:
         super(CA, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.conv_du = nn.Sequential(
@@ -53,7 +53,22 @@ class CA(nn.Module):
     def forward(self, x):
         y = self.avg_pool(x)
         y = self.conv_du(y)
-        return y * x
+        return x * y
+
+
+class PA(nn.Module):
+    def __init__(self, channels, reduction=8):
+        super(PA, self).__init__()
+        self.pa = nn.Sequential(
+            nn.Conv2d(channels, channels // reduction, 1, padding='same', bias=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(channels // reduction, 1, 1, padding='same', bias=True),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.pa(x)
+        return x * y
 
 
 # Enhancer Chanel Attention
