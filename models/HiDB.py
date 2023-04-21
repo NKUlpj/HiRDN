@@ -7,7 +7,6 @@
 """
 
 import torch.nn as nn
-from .BottleNeck import BottleNeck
 from .Config import get_config
 from .RU import ResidualUnit
 from .HiFM import HiFM

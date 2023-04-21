@@ -17,6 +17,7 @@ from torch.distributions.normal import Normal
 class LayerNorm(nn.Module):
     r""" From ConvNeXt (https://arxiv.org/pdf/2201.03545.pdf)
     """
+
     def __init__(self, normalized_shape, eps=1e-6, data_format="channels_last"):
         super().__init__()
         self.weight = nn.Parameter(torch.ones(normalized_shape))
@@ -38,24 +39,6 @@ class LayerNorm(nn.Module):
             return x
 
 
-# Basic Channel Attention
-class CA(nn.Module):
-    def __init__(self, channels, reduction=8) -> None:
-        super(CA, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.conv_du = nn.Sequential(
-            nn.Conv2d(channels, channels // reduction, 1, padding=0, bias=True),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(channels // reduction, channels, 1, padding=0, bias=True),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        y = self.avg_pool(x)
-        y = self.conv_du(y)
-        return x * y
-
-
 class PA(nn.Module):
     def __init__(self, channels, reduction=8):
         super(PA, self).__init__()
@@ -69,6 +52,24 @@ class PA(nn.Module):
     def forward(self, x):
         y = self.pa(x)
         return x * y
+
+
+# Basic Channel Attention
+class CA(nn.Module):
+    def __init__(self, channels, reduction=16) -> None:
+        super(CA, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.conv_du = nn.Sequential(
+            nn.Conv2d(channels, channels // reduction, 1, padding=0, bias=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(channels // reduction, channels, 1, padding=0, bias=True),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.avg_pool(x)
+        y = self.conv_du(y)
+        return y * x
 
 
 # Enhancer Chanel Attention
@@ -107,6 +108,7 @@ class ESA(nn.Module):
     CCA Layer, spatial attention
     Code copy from https://github.com/njulj/RFDN/blob/master/block.py
     """
+
     def __init__(self, channels, conv=nn.Conv2d):
         super(ESA, self).__init__()
         f = channels // 4
@@ -139,24 +141,21 @@ class ESA(nn.Module):
 class ConvMod(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        layer_scale_init_value = 1e-6
         self.norm = LayerNorm(channels, eps=1e-6, data_format='channels_first')
         self.a = nn.Sequential(
             nn.Conv2d(channels, channels, 1),
             nn.GELU(),
-            nn.Conv2d(channels, channels, 11, padding=5, groups=channels)  # n - k + 2p + 1 = n
+            nn.Conv2d(channels, channels, 13, padding='same', groups=channels)  # n - k + 2p + 1 = n
         )
         self.v = nn.Conv2d(channels, channels, 1)
         self.proj = nn.Conv2d(channels, channels, 1)
-        self.layer_scale = nn.Parameter(
-            layer_scale_init_value * torch.ones(channels), requires_grad=True)
 
     def forward(self, x):
         r = self.norm(x)
         a = self.a(r)
         r = a * self.v(r)
         r = self.proj(r)
-        return x + self.layer_scale.unsqueeze(-1).unsqueeze(-1) * r
+        return x + r
 
 
 class HiCBAM(nn.Module):
@@ -164,21 +163,22 @@ class HiCBAM(nn.Module):
     Input: B * C * H * W
     Out:   B * C * H * W
     """
+
     def __init__(self, channels) -> None:
         super(HiCBAM, self).__init__()
-        self.channel_attention = ECA(channels)
-        self.spatial_attention = ESA(conv=nn.Conv2d, channels=channels)
+        self.channel_attention = CA(channels)
+        self.pixel_attention = PA(channels)
 
     def forward(self, x):
         out = self.channel_attention(x)
-        out = self.spatial_attention(out)
+        out = self.pixel_attention(out)
         return out
 
 
 class LKA(nn.Module):
     def __init__(self, channels):
         super(LKA, self).__init__()
-        self.conv0 = nn.Conv2d(channels, channels, 11, padding='same', groups=channels)
+        self.conv0 = nn.Conv2d(channels, channels, 7, padding='same', groups=channels)
         self.conv_spatial = nn.Conv2d(channels, channels, 15, stride=1, padding='same', groups=channels, dilation=3)
         self.conv1 = nn.Conv2d(channels, channels, 1)
 
@@ -195,7 +195,7 @@ class ChannelWiseSpatialAttention(nn.Module):
         super().__init__()
         self.proj_1 = nn.Conv2d(channels, channels, 1)
         self.activation = nn.GELU()
-        self.spatial_gating_unit = LKA(channels)
+        self.spatial_gating_unit = ConvMod(channels)
         self.ca = CA(channels=channels)
         self.proj_2 = nn.Conv2d(channels * 2, channels, 1)
 
@@ -209,77 +209,36 @@ class ChannelWiseSpatialAttention(nn.Module):
         return x + r
 
 
-class PRMLayer(nn.Module):
-    def __init__(self, groups=52, mode='dot_product'):
-        super(PRMLayer, self).__init__()
-        self.mode = mode
-        self.groups = groups
-        self.max_pool = nn.AdaptiveMaxPool2d(1, return_indices=True)
-        self.weight = nn.Parameter(torch.zeros(1, self.groups, 1, 1))
-        self.bias = nn.Parameter(torch.ones(1, self.groups, 1, 1))
-        self.sig = nn.Sigmoid()
-        self.gap = nn.AdaptiveAvgPool2d(1)
-        self.one = nn.Parameter(torch.ones(1, self.groups, 1))
-        self.zero = nn.Parameter(torch.zeros(1, self.groups, 1))
-        self.theta = nn.Parameter(torch.rand(1, 2, 1, 1))
-        self.scale = nn.Parameter(torch.ones(1))
+class NonLocalAttention(nn.Module):
+    def __init__(self, channels, reduction=2, res_scale=1):
+        super(NonLocalAttention, self).__init__()
+        self.res_scale = res_scale
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(channels, channels // reduction, 1),
+            nn.PReLU()
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(channels, channels // reduction, 1),
+            nn.PReLU()
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(channels, channels, 1),
+            nn.PReLU()
+        )
 
     def forward(self, x):
-        b, c, h, w = x.size()
-        position_mask = self.get_position_mask(x, b, h, w, self.groups)  # batch * group, 2, 64, 64
-        # Similarity function
-        query_value, query_position = self.get_query_position(x, self.groups)  # shape [b*num,2,1,1]
-        # print(query_position.float()/h)
-        query_value = query_value.view(b*self.groups, -1, 1)
-        x_value = x.view(b * self.groups, -1, h * w)
-        similarity_max = self.get_similarity(x_value, query_value, mode=self.mode)
-        similarity_gap = self.get_similarity(x_value, self.gap(x).view(b * self.groups, -1, 1), mode=self.mode)
-        similarity_max = similarity_max.view(b, self.groups, h * w)
-        distance = abs(position_mask - query_position)
-        distance = distance.type(query_value.type())
-        # distance = torch.exp(-distance * self.theta)
-        distribution = Normal(0, self.scale)
-        distance = distribution.log_prob(distance * self.theta).exp().clone()
-        distance = (distance.mean(dim=1)).view(b, self.groups, h * w)
-        # print_dis = distance.mean(dim=0).mean(dim=0).view(h, w)
-        # np.savetxt(time.perf_counter().__str__()+'.txt', print_dis.detach().cpu().numpy())
-        similarity_max = similarity_max*distance
-        similarity_gap = similarity_gap.view(b, self.groups, h*w)
-        similarity = similarity_max*self.zero+similarity_gap*self.one
-        context = similarity - similarity.mean(dim=2, keepdim=True)
-        std = context.std(dim=2, keepdim=True) + 1e-5
-        context = (context/std).view(b, self.groups, h, w)
-        # affine function
-        context = context * self.weight + self.bias
-        context = context.view(b*self.groups, 1, h, w)\
-            .expand(b*self.groups, c//self.groups, h, w).reshape(b, c, h, w)
-        value = x*self.sig(context)
-        return value
+        x_embed_1 = self.conv1(x)
+        x_embed_2 = self.conv2(x)
+        x_embed_3 = self.conv3(x)
 
-    @staticmethod
-    def get_position_mask(x, b, h, w, number):
-        mask = (x[0, 0, :, :] != 2020).nonzero()
-        mask = (mask.reshape(h, w, 2)).permute(2, 0, 1).expand(b*number, 2, h, w)
-        return mask
+        n, c, h, w = x_embed_1.shape
+        x_embed_1 = x_embed_1.permute(0, 2, 3, 1).view(n, h * w, c)
+        x_embed_2 = x_embed_2.view(n, c, h * w)
+        score = torch.matmul(x_embed_1, x_embed_2)
+        score = F.softmax(score, dim=2)
+        x_embed_3 = x_embed_3.view(n, -1, h * w).permute(0, 2, 1)
+        x_res = torch.matmul(score, x_embed_3)
+        return x_res.permute(0, 2, 1).view(n, -1, h, w) + self.res_scale * x
 
-    def get_query_position(self, query, groups):
-        b, c, h, w = query.size()
-        value = query.view(b*groups, c//groups, h, w)
-        value = value.sum(dim=1, keepdim=True)
-        max_value, max_position = self.max_pool(value)
-        t_position = torch.cat((max_position//w, max_position % w), dim=1)
-        t_value = value[torch.arange(b*groups), :, t_position[:, 0, 0, 0], t_position[:, 1, 0, 0]]
-        t_value = t_value.view(b, c, 1, 1)
-        return t_value, t_position
 
-    @staticmethod
-    def get_similarity(query, key_value, mode='dot_product'):
-        if mode == 'dot_product':
-            similarity = torch.matmul(key_value.permute(0, 2, 1), query).squeeze(dim=1)
-        elif mode == 'l1norm':
-            similarity = -(abs(query - key_value)).sum(dim=1)
-        elif mode == 'cosine':
-            similarity = torch.cosine_similarity(query, key_value, dim=1)
-        else:
-            similarity = torch.matmul(key_value.permute(0, 2, 1), query)
-        return similarity
+
