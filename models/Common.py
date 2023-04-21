@@ -85,7 +85,9 @@ __attention_dict = {
     'LKA': LKA,
     'ESA': ESA,
     'ECA': ECA,
-    'PA': PA
+    'PA': PA,
+    'NLA': NonLocalAttention,
+    'CCA': CrissCrossAttention
 }
 
 

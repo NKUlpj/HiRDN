@@ -11,9 +11,9 @@
 __T = {
     'HiRDN': [52, 6, 1, 8],
     'HiDB': 'HiCBAM',
-    'HiFM': 'LKA',
+    'HiFM': 'CCA',
     'RU': [2, 3, 0],  # reduction_ratio, kernel size, block num
-    'Loss': [0.06, 1.5e-4, 1.5e-4, 5e-6, 1]  # perception_loss[:3], dists_loss, image_loss
+    'Loss': [0.06, 1.5e-4, 1.5e-4, 0.005, 1]  # perception_loss[:3], dists_loss, image_loss
 }
 # Model_S [Small]
 __S = {
