@@ -13,12 +13,17 @@ import numpy as np
 
 from utils.parser_helper import model_predict_parser, root_dir
 from model_predict import model_predict
+import logging
+
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 
 
 def __save_data(data, file, verbose=False):
     np.savez_compressed(file, hic=data)
     if verbose:
-        print('Saving file:', file)
+        logging.debug(f'Saving file:{file}')
 
 
 if __name__ == '__main__':
@@ -40,7 +45,7 @@ if __name__ == '__main__':
     else:
         pool_num = multiprocessing.cpu_count() - 2
     pool = multiprocessing.Pool(processes=pool_num)
-    print(f'Start a multiprocess pool with process_num = {pool_num} for saving predicted data')
+    logging.debug(f'Start a multiprocess pool with process_num = {pool_num} for saving predicted data')
     # below multiprocess must be run in main func
     for key in sizes.keys():
         pool.apply_async(save_data_n, (key,))

@@ -17,6 +17,11 @@ from utils.io_helper import divide
 import numpy as np
 import multiprocessing
 import time
+import logging
+
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 
 
 def data_divider(
@@ -59,7 +64,7 @@ if __name__ == '__main__':
     chr_list = set_dict[dataset]
     postfix = cell_line.lower() if dataset == 'all' else dataset
 
-    print(f'Going to read {high_res} and {low_res} data')
+    logging.debug(f'Going to read {high_res} and {low_res} data')
 
     pool_num = 23 if multiprocessing.cpu_count(
     ) > 23 else multiprocessing.cpu_count() - 2
@@ -70,8 +75,7 @@ if __name__ == '__main__':
 
     start = time.time()
     pool = multiprocessing.Pool(processes=pool_num)
-    print(
-        f'Start a multiprocess pool with processes = {pool_num} for generating data')
+    logging.debug(f'Start a multiprocess pool with processes = {pool_num} for generating data')
     results = []
     for n in chr_list:
         high_file = os.path.join(data_dir, f'chr{n}_{high_res}.npz')
@@ -82,9 +86,7 @@ if __name__ == '__main__':
         results.append(res)
     pool.close()
     pool.join()
-    print(
-        f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')
-    print(results)
+    logging.debug(f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')
     data = np.concatenate([r.get()[1] for r in results])
     target = np.concatenate([r.get()[2] for r in results])
     inds = np.concatenate([r.get()[3] for r in results])
@@ -98,4 +100,5 @@ if __name__ == '__main__':
         target=target,
         inds=inds,
         sizes=sizes)
-    print('Saving file:', split_file)
+    logging.debug(f'Saving file:{split_file}')
+

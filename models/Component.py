@@ -115,7 +115,7 @@ class DoubleConv(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding='same')
         self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding='same')
-        # BN is not recommended using in image tasks [such as SISR， see EDSR]
+        # BN is not recommended using in image tasks [such as SISR, see EDSR]
         # self.bn1 = nn.BatchNorm2d(out_channels)
         # self.bn2 = nn.BatchNorm2d(out_channels)
         self.act = nn.LeakyReLU(inplace=True)

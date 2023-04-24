@@ -5,34 +5,35 @@
 @Author: nkul
 @Date: 2023/4/10 下午1:56
 """
+
+import torch
 import torch.nn as nn
 from .Common import *
-from .Config import get_config
-from .HiDB import HiDB
-from .UBlock import UBlock
+from .Component import HiDB, UBlock
 
 
 class HiRDN(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, mode='T') -> None:
         super(HiRDN, self).__init__()
-        _config = get_config(mode)
-        _hidden_channels = _config['HiRDN'][0]
-        _block_num = _config['HiRDN'][1]
+        _hidden_channels = (48 if mode == 'T' else 52)
+        _block_num = (4 if mode == 'T' else 6)
         self.fea_conv = conv_layer(in_channels, _hidden_channels, kernel_size=3)
-        self.hidb_group = nn.ModuleList()
 
+        # HiDB
+        self.hidb_group = nn.ModuleList()
         for _ in range(_block_num):
             self.hidb_group.append(
                 HiDB(channels=_hidden_channels, mode=mode)
             )
 
+        # reduce channels
         self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='lrelu')
         self.LR_conv = conv_layer(_hidden_channels, _hidden_channels, kernel_size=3)
         self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='lrelu')
-        _att = _config['HiRDN'][2]
-        # HiRDN_L
-        if _att == 1:
-            _block_channels = _config['HiRDN'][3]
+
+        # attention block
+        if mode != 'T':
+            _block_channels = 8
             print('HiRDN is using UNet Attention')
             self.attn = UBlock(in_channels=in_channels, hidden_channels=_block_channels, out_channels=out_channels)
             self.ca = get_attn_by_name('CA', _hidden_channels * _block_num)

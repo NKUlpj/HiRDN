@@ -19,6 +19,11 @@ sys.path.append(root_path)
 
 from utils.parser_helper import *
 from utils.io_helper import down_sampling
+import logging
+
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 
 
 def down_sample(in_file, _low_res, _ratio):
@@ -29,7 +34,7 @@ def down_sample(in_file, _low_res, _ratio):
     out_file = os.path.join(os.path.dirname(
         in_file), f'{chr_name}_{_low_res}.npz')
     np.savez_compressed(out_file, hic=down_hic, ratio=_ratio)
-    print('Saving file:', out_file)
+    logging.debug(f'Saving file:{out_file}')
 
 
 if __name__ == '__main__':
@@ -46,14 +51,13 @@ if __name__ == '__main__':
     in_files = [os.path.join(data_dir, f)
                 for f in os.listdir(data_dir) if f.find(high_res) >= 0]
 
-    print(
-        f'Generating {low_res} files from {high_res} files by {ratio}x down_sampling.')
+    logging.debug(f'Generating {low_res} files from {high_res} files by {ratio}x down_sampling.')
     start = time.time()
-    print(f'Start a multiprocess pool with process_num = {pool_num}')
+    logging.debug(f'Start a multiprocess pool with process_num = {pool_num}')
     pool = multiprocessing.Pool(pool_num)
     for file in in_files:
         pool.apply_async(down_sample, (file, low_res, ratio))
     pool.close()
     pool.join()
-    print(
-        f'All down_sampling processes done. Running cost is {(time.time()-start)/60:.1f} min.')
+    logging.debug(f'All down_sampling processes done. Running cost is {(time.time()-start)/60:.1f} min.')
+

@@ -15,10 +15,6 @@ from tqdm import tqdm
 import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
-import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
-import compared_models.DeepHiC_Loss as DeepHiC_Loss
-from models import HiRDN_Loss
-from models import Loss
 from utils.evaluating import eval_lpips, eval_dists
 from utils.parser_helper import root_dir
 from utils.ssim import ssim
@@ -32,7 +28,7 @@ import logging
 
 # 设置logging的等级以及打印格式
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s]: %(message)s')
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -207,7 +203,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
     print(log_info)
 
     # step 3: load loss
-    criterion_g = DeepHiC_Loss.GeneratorLoss().to(device)
+    criterion_g = get_loss_fn('DeepHiC').to(device)
     criterion_d = torch.nn.BCELoss().to(device)
 
     # optimizer

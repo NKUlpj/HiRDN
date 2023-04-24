@@ -22,11 +22,16 @@ from DISTS_pytorch import DISTS
 from utils.util_func import get_model, loader, get_device
 import warnings
 warnings.filterwarnings("ignore")
+import logging
+
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 
 
 def __save_data(data, file):
     np.savez_compressed(file, hic=data)
-    print('Saving file:', file)
+    logging.debug(f'Saving file:{file}')
 
 
 def __data_info(data):
@@ -83,8 +88,7 @@ def __model_predict(model, _loader, ckpt_file):
     this_psnr = val_res['psnr']
     this_lpips = val_res['lpips'] / val_res['samples']
     this_dists = val_res['dists'] / val_res['samples']
-    print(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f}; '
-          f'LPIPS:{this_lpips:.6f}; DISTS:{this_dists:.6f};')
+    logging.debug(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f}; LPIPS:{this_lpips:.6f}; DISTS:{this_dists:.6f};')
     return res_hic
 
 
@@ -93,7 +97,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     model, _padding, _, = get_model(model_name)
 
     # 2) Load File
-    print(f'Loading predict data: {predict_file}')
+    logging.debug(f'Loading predict data: {predict_file}')
     # Load Predict Data
     in_dir = os.path.join(root_dir, 'data')
     predict_file_path = os.path.join(in_dir, predict_file)
@@ -107,8 +111,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     start = time.time()
     res_hic = __model_predict(model, predict_loader, best_ckpt_file)
     end = time.time()
-
-    print(f'Model running cost is {(end - start):.6f} s.')
+    logging.debug(f'Model running cost is {(end - start):.6f} s.')
 
     # 5） return, put save code in main func as multiprocess must be created in main
     sizes = __data_info(predict_data_np)

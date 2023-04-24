@@ -35,17 +35,23 @@ import numpy as np
 import multiprocessing
 import time
 
+import logging
+
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
+
 
 def read_data(data_file, norm_file, _out_dir, _resolution):
     filename = os.path.basename(data_file).split('.')[0] + '.npz'
     out_file = os.path.join(_out_dir, filename)
     try:
         _hic = read_coo2mat(data_file, norm_file, _resolution)
-    except BaseException:
-        print(f'Abnormal file: {norm_file}')
+    except NotImplementedError:
+        logging.error(f'Abnormal file: {norm_file}')
         exit()
     np.savez_compressed(out_file, hic=_hic)
-    print('Saving file:', out_file)
+    logging.debug(f'Saving file:{out_file}')
 
 
 if __name__ == '__main__':
@@ -74,14 +80,12 @@ if __name__ == '__main__':
 
     out_dir = os.path.join(root_dir, 'mat', cell_line)
     mkdir(out_dir)
-    print(
-        f'Start reading data, there are {len(norm_files)} files ({resolution}).')
-    print(f'Output directory: {out_dir}')
+    logging.debug(f'Start reading data, there are {len(norm_files)} files ({resolution}).')
+    logging.debug(f'Output directory: {out_dir}')
 
     start = time.time()
     pool = multiprocessing.Pool(processes=pool_num)
-    print(
-        f'Start a multiprocess pool with process_num={pool_num} for reading raw data')
+    logging.debug(f'Start a multiprocess pool with process_num={pool_num} for reading raw data')
     for data_fn, norm_fn in zip(data_files, norm_files):
         pool.apply_async(
             read_data,
@@ -91,5 +95,5 @@ if __name__ == '__main__':
              res_map[resolution]))
     pool.close()
     pool.join()
-    print(
-        f'All reading processes done. Running cost is {(time.time()-start)/60:.1f} min.')
+    logging.debug(f'All reading processes done. Running cost is {(time.time()-start)/60:.1f} min.')
+
