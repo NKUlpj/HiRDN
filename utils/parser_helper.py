@@ -249,7 +249,7 @@ def model_train_parser():
     misc_args.add_argument(
         '-m',
         dest='model',
-        help='Required: models[HiRDN, HiCARN, DeepHiC, HiCSR, HiCNN]',
+        help='Required: models[HiRDN_T(or HiRDN), HiRDN_L, HiCARN, DeepHiC, HiCSR, HiCNN]',
         required=True,
         default="HiRDN"
     )
@@ -310,7 +310,7 @@ def model_predict_parser():
     misc_args.add_argument(
         '-m',
         dest='model',
-        help='Required: models[HiRDN, HiCARN, DeepHiC, HiCSR, HICNN]',
+        help='Required: models[HiRDN_T(or HiRDN), HiRDN_L, HiCARN, DeepHiC, HiCSR, HiCNN]',
         required=True,
         default="HiRDN"
     )

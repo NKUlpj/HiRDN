@@ -18,16 +18,21 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
 import compared_models.DeepHiC_Loss as DeepHiC_Loss
 from models import HiRDN_Loss
+from models import Loss
 from utils.evaluating import eval_lpips, eval_dists
 from utils.parser_helper import root_dir
 from utils.ssim import ssim
 from math import log10
 import lpips
 from DISTS_pytorch import DISTS
-from utils.util_func import get_device, get_model, loader
+from utils.util_func import get_device, get_model, loader, get_loss_fn
 import warnings
 warnings.filterwarnings("ignore")
+import logging
 
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s]: %(message)s')
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -65,19 +70,12 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
 
     # step 2: load model
     net = model.to(device)
-    log_info = f"Model parameter number: {sum(p.numel() for p in net.parameters() if p.requires_grad)}"
-    print(log_info)
+    log_info = f"model parameter number - {sum(p.numel() for p in net.parameters() if p.requires_grad)}"
+    logging.debug(log_info)
 
     # step 3: load loss
-    if model_name == 'HiRDN':
-        print("Using HiRDN_Loss")
-        criterion = HiRDN_Loss.GeneratorLoss(device=device).to(device)
-    elif model_name == 'DeepHiC':
-        print('Using DeepHiC Loss')
-        criterion = DeepHiC_Loss.GeneratorLoss().to(device)
-    else:
-        print('Using HiCARN_1 Loss')
-        criterion = HiCARN_1_Loss.GeneratorLoss().to(device)
+    criterion = get_loss_fn(model_name, device)
+    criterion.to(device)
     lpips_fn = lpips.LPIPS(net='vgg', verbose=False)
     lpips_fn.to(device)
     dists_fn = DISTS()

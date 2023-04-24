@@ -18,9 +18,17 @@ import compared_models.HiCARN_1 as HiCARN
 import compared_models.HiCNN as HiCNN
 import compared_models.DeepHiC as DeepHiC
 import compared_models.HiCSR as HiCSR
-# from models.HiRDN import HiRDN
-import models.HiRDN as HiRDN
+# import models.HiRDN as HiRDN
+import models.HiRDN_T as HiRDN
+import models.Loss as Loss
+import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
+import compared_models.DeepHiC_Loss as DeepHiC_Loss
 from utils.parser_helper import root_dir
+import logging
+
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s]: %(message)s')
 
 
 # get model by name
@@ -29,8 +37,11 @@ def get_model(_model_name):
     _netG = None
     _netD = None
 
-    if _model_name == 'HiRDN':
-        _netG = HiRDN.HiRDN()
+    if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
+        _netG = HiRDN.HiRDN(mode='T')
+
+    elif _model_name == 'HiRDN_L':
+        _netG = HiRDN.HiRDN(mode='L')
 
     elif _model_name == 'HiCARN':
         _netG = HiCARN.Generator(num_channels=64)
@@ -68,7 +79,8 @@ def loader(file_name, loader_type='train', padding=False, shuffle=True, batch_si
 
     __inds_np = __file_np['inds']
     __inds_tensor = torch.tensor(__inds_np, dtype=torch.int)
-    print(f"{loader_type} Set Size: {__input_tensor.size()}")
+    # print(f"{loader_type} Set Size: {__input_tensor.size()}")
+    logging.debug(f"{loader_type} Set Size - {__input_tensor.size()}")
     __dataset = TensorDataset(__input_tensor, __target_tensor, __inds_tensor)
     __data_loader = DataLoader(__dataset, batch_size=batch_size, shuffle=shuffle, drop_last=True)
     return __data_loader
@@ -77,7 +89,23 @@ def loader(file_name, loader_type='train', padding=False, shuffle=True, batch_si
 def get_device():
     _has_cuda = torch.cuda.is_available()
     _device = torch.device('cuda:0' if _has_cuda else 'cpu')
-    print("CUDA available? ", _has_cuda)
+    logging.debug(f"CUDA available? {_has_cuda}")
     if not _has_cuda:
-        print("GPU acceleration is strongly recommended")
+        logging.warning("GPU acceleration is strongly recommended")
     return _device
+
+
+def get_loss_fn(_model_name, device):
+    if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
+        logging.debug('Using HiRDN_T_Loss')
+        loss = Loss.LossT(device=device)
+    elif _model_name == 'HiRDN_L':
+        logging.debug('Using HiRDN_L_Loss')
+        loss = Loss.LossL(device=device)
+    elif _model_name == 'DeepHiC':
+        logging.debug('Using DeepHiC_Loss')
+        loss = DeepHiC_Loss.GeneratorLoss()
+    else:
+        logging.debug('Using HiCARN_Loss')
+        loss = HiCARN_1_Loss.GeneratorLoss()
+    return loss

@@ -10,7 +10,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from torch.distributions.normal import Normal
 
 
 # Rewrite Layer Norm, see the issue in ConvNeXt Repo
@@ -73,7 +72,8 @@ class CA(nn.Module):
 
 
 # Enhancer Chanel Attention
-# See ref ECA-NET
+# See ref ECA-NET,
+# NOT USE
 class ECA(nn.Module):
     def __init__(self, channels, b=1, gama=1) -> None:
         super(ECA, self).__init__()
@@ -103,6 +103,7 @@ class ECA(nn.Module):
         return self.sigmod(x0 + x1) * x
 
 
+# NOT USE
 class ESA(nn.Module):
     r"""
     CCA Layer, spatial attention
@@ -138,6 +139,7 @@ class ESA(nn.Module):
 
 # Former-Style Spatial Attention
 # See ref Conv2Former
+# NOT USE
 class ConvMod(nn.Module):
     def __init__(self, channels):
         super().__init__()
@@ -178,7 +180,7 @@ class HiCBAM(nn.Module):
 class LKA(nn.Module):
     def __init__(self, channels):
         super(LKA, self).__init__()
-        self.conv0 = nn.Conv2d(channels, channels, 7, padding='same', groups=channels)
+        self.conv0 = nn.Conv2d(channels, channels, 9, padding='same', groups=channels)
         self.conv_spatial = nn.Conv2d(channels, channels, 15, stride=1, padding='same', groups=channels, dilation=3)
         self.conv1 = nn.Conv2d(channels, channels, 1)
 
@@ -247,10 +249,11 @@ def _inf(b, h, w):
 
 class CrissCrossAttention(nn.Module):
     """ Criss-Cross Attention Module"""
-    def __init__(self, in_dim):
+
+    def __init__(self, in_dim, reduction=8):
         super(CrissCrossAttention, self).__init__()
-        self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim // 8, kernel_size=1)
-        self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim // 8, kernel_size=1)
+        self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim // reduction, kernel_size=1)
+        self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim // reduction, kernel_size=1)
         self.value_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
         self.softmax = nn.Softmax(dim=3)
         self.INF = _inf
@@ -260,9 +263,9 @@ class CrissCrossAttention(nn.Module):
         m_batch_size, _, height, width = x.size()
         proj_query = self.query_conv(x)
         proj_query_h = proj_query.permute(0, 3, 1, 2).contiguous().view(m_batch_size * width, -1, height).permute(0, 2,
-                                                                                                                 1)
+                                                                                                                  1)
         proj_query_w = proj_query.permute(0, 2, 1, 3).contiguous().view(m_batch_size * height, -1, width).permute(0, 2,
-                                                                                                                 1)
+                                                                                                                  1)
         proj_key = self.key_conv(x)
         proj_key_h = proj_key.permute(0, 3, 1, 2).contiguous().view(m_batch_size * width, -1, height)
         proj_key_w = proj_key.permute(0, 2, 1, 3).contiguous().view(m_batch_size * height, -1, width)
@@ -278,8 +281,9 @@ class CrissCrossAttention(nn.Module):
         # print(concate)
         # print(att_h)
         att_w = concate[:, :, :, height:height + width].contiguous().view(m_batch_size * height, width, width)
-        out_h = torch.bmm(proj_value_h, att_h.permute(0, 2, 1)).view(m_batch_size, width, -1, height).permute(0, 2, 3, 1)
-        out_w = torch.bmm(proj_value_w, att_w.permute(0, 2, 1)).view(m_batch_size, height, -1, width).permute(0, 2, 1, 3)
+        out_h = torch.bmm(proj_value_h, att_h.permute(0, 2, 1)).view(m_batch_size, width, -1, height).permute(0, 2, 3,
+                                                                                                              1)
+        out_w = torch.bmm(proj_value_w, att_w.permute(0, 2, 1)).view(m_batch_size, height, -1, width).permute(0, 2, 1,
+                                                                                                              3)
         # print(out_h.size(),out_w.size())
         return self.gamma * (out_h + out_w) + x
-
