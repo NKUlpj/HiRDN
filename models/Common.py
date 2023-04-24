@@ -78,16 +78,10 @@ def get_act_fn(act_type, inplace=True, neg_slope=0.05, n_prelu=1):
 
 
 __attention_dict = {
-    'ConvMod': ConvMod,
     'CA': CA,
-    'CWSA': ChannelWiseSpatialAttention,
     'HiCBAM': HiCBAM,
     'LKA': LKA,
-    'ESA': ESA,
-    'ECA': ECA,
-    'PA': PA,
-    'NLA': NonLocalAttention,
-    'CCA': CrissCrossAttention
+    'PA': PA
 }
 
 
