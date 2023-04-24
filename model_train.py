@@ -66,7 +66,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
 
     # step 2: load model
     net = model.to(device)
-    log_info = f"model parameter number - {sum(p.numel() for p in net.parameters() if p.requires_grad)}"
+    log_info = f"Model parameter number - {sum(p.numel() for p in net.parameters() if p.requires_grad)}"
     logging.debug(log_info)
 
     # step 3: load loss
@@ -337,8 +337,8 @@ def model_train(_model_name, _train_file, _valid_file, _max_epochs, _batch_size,
     net_g, _padding, net_d = get_model(_model_name)
 
     # 2) get loader
-    train_loader = loader(_train_file, 'train', _padding, True, _batch_size)
-    valid_loader = loader(_valid_file, 'valid', _padding, False, _batch_size)
+    train_loader = loader(_train_file, 'Train', _padding, True, _batch_size)
+    valid_loader = loader(_valid_file, 'Valid', _padding, False, _batch_size)
 
     # 3) train
     if net_d is not None:

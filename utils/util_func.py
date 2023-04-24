@@ -60,12 +60,12 @@ def get_model(_model_name):
         _netD = DeepHiC.Discriminator(in_channel=1)
     else:
         raise NotImplementedError('Model {} is not implemented'.format(_model_name))
-    logging.debug(f'running {_model_name}')
+    logging.debug(f'Running {_model_name}')
     return _netG, _padding, _netD
 
 
 # get data loader
-def loader(file_name, loader_type='train', padding=False, shuffle=True, batch_size=64):
+def loader(file_name, loader_type='Train', padding=False, shuffle=True, batch_size=64):
     __data_dir = os.path.join(root_dir, 'data')
     __file = os.path.join(__data_dir, file_name)
     __file_np = np.load(__file)

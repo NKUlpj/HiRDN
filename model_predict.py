@@ -102,7 +102,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     in_dir = os.path.join(root_dir, 'data')
     predict_file_path = os.path.join(in_dir, predict_file)
     predict_data_np = np.load(predict_file_path, allow_pickle=True)
-    predict_loader = loader(predict_file, 'predict', _padding, False, _batch_size)
+    predict_loader = loader(predict_file, 'Predict', _padding, False, _batch_size)
 
     # 3) Load ckpt
     best_ckpt_file = os.path.join(root_dir, 'checkpoints', ckpt)
