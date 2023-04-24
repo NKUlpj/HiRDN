@@ -10,7 +10,7 @@ import torch.nn as nn
 
 
 class PA(nn.Module):
-    def __init__(self, channels, reduction=8):
+    def __init__(self, channels, reduction=4):
         super(PA, self).__init__()
         self.pa = nn.Sequential(
             nn.Conv2d(channels, channels // reduction, 1, padding='same', bias=True),
@@ -26,7 +26,7 @@ class PA(nn.Module):
 
 # Basic Channel Attention
 class CA(nn.Module):
-    def __init__(self, channels, reduction=8) -> None:
+    def __init__(self, channels, reduction=4) -> None:
         super(CA, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.conv_du = nn.Sequential(

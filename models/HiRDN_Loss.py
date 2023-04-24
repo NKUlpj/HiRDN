@@ -61,7 +61,7 @@ class LossL(nn.Module):
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
         # perception_loss[0:3], dists_loss, l1_image_loss
-        self.loss_weights = [0.08, 1e-4, 1e-4, 0.0005, 0.001]
+        self.loss_weights = [0.1, 1.5e-4, 1.5e-4, 0.005, 0.002]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
@@ -93,7 +93,7 @@ class MS_SSIM_L1_LOSS(nn.Module):
     # TODO alpha
     def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.025, compensation=200.0, channel=1):
         super(MS_SSIM_L1_LOSS, self).__init__()
-        gaussian_sigmas = [0.5, 1.0, 2.0, 4.0, 8.0],
+        gaussian_sigmas = [0.5, 1.0, 2.0, 4.0, 8.0]
         self.channel = channel
         self.DR = data_range
         self.C1 = (k[0] * data_range) ** 2
@@ -106,12 +106,12 @@ class MS_SSIM_L1_LOSS(nn.Module):
         for idx, sigma in enumerate(gaussian_sigmas):
             if self.channel == 1:
                 # only gray layer
-                g_masks[idx, 0, :, :] = self._fspecial_gauss_2d(filter_size, sigma)
+                g_masks[idx, 0, :, :] = self._f_special_gauss_2d(filter_size, sigma)
             elif self.channel == 3:
                 # r0,g0,b0,r1,g1,b1,...,rM,gM,bM
-                g_masks[self.channel * idx + 0, 0, :, :] = self._fspecial_gauss_2d(filter_size, sigma)
-                g_masks[self.channel * idx + 1, 0, :, :] = self._fspecial_gauss_2d(filter_size, sigma)
-                g_masks[self.channel * idx + 2, 0, :, :] = self._fspecial_gauss_2d(filter_size, sigma)
+                g_masks[self.channel * idx + 0, 0, :, :] = self._f_special_gauss_2d(filter_size, sigma)
+                g_masks[self.channel * idx + 1, 0, :, :] = self._f_special_gauss_2d(filter_size, sigma)
+                g_masks[self.channel * idx + 2, 0, :, :] = self._f_special_gauss_2d(filter_size, sigma)
             else:
                 raise ValueError
         self.g_masks = g_masks.to(device=device)
@@ -138,21 +138,22 @@ class MS_SSIM_L1_LOSS(nn.Module):
         Returns:
             torch.Tensor: 2D kernel (size x size)
         """
-        gaussian_vec = self._fspecial_gauss_1d(size, sigma)
+        gaussian_vec = self._f_special_gauss_1d(size, sigma)
         return torch.outer(gaussian_vec, gaussian_vec)
 
     def forward(self, x, y):
-        # b, c, h, w = x.shape
-        mu_x = F.conv2d(x, self.g_masks, groups=3, padding=self.pad)
-        mu_y = F.conv2d(y, self.g_masks, groups=3, padding=self.pad)
+        b, c, h, w = x.shape
+        assert c == self.channel
+        mu_x = F.conv2d(x, self.g_masks, groups=c, padding=self.pad)
+        mu_y = F.conv2d(y, self.g_masks, groups=c, padding=self.pad)
 
         mu_x2 = mu_x * mu_x
         mu_y2 = mu_y * mu_y
         mu_xy = mu_x * mu_y
 
-        sigma_x2 = F.conv2d(x * x, self.g_masks, groups=3, padding=self.pad) - mu_x2
-        sigma_y2 = F.conv2d(y * y, self.g_masks, groups=3, padding=self.pad) - mu_y2
-        sigma_xy = F.conv2d(x * y, self.g_masks, groups=3, padding=self.pad) - mu_xy
+        sigma_x2 = F.conv2d(x * x, self.g_masks, groups=c, padding=self.pad) - mu_x2
+        sigma_y2 = F.conv2d(y * y, self.g_masks, groups=c, padding=self.pad) - mu_y2
+        sigma_xy = F.conv2d(x * y, self.g_masks, groups=c, padding=self.pad) - mu_xy
 
         # l(j), cs(j) in MS-SSIM
         _l = (2 * mu_xy + self.C1) / (mu_x2 + mu_y2 + self.C1)  # [B, 15, H, W]
@@ -170,8 +171,8 @@ class MS_SSIM_L1_LOSS(nn.Module):
 
         loss_l1 = F.l1_loss(x, y, reduction='none')  # [B, 3, H, W]
         # average l1 loss in 3 channels
-        gaussian_l1 = F.conv2d(loss_l1, self.g_masks.narrow(dim=0, start=-3, length=3),
-                               groups=3, padding=self.pad).mean(1)  # [B, H, W]
+        gaussian_l1 = F.conv2d(loss_l1, self.g_masks.narrow(dim=0, start=-self.channel, length=self.channel),
+                               groups=c, padding=self.pad).mean(1)  # [B, H, W]
 
         loss_mix = self.alpha * loss_ms_ssim + (1 - self.alpha) * gaussian_l1 / self.DR
         loss_mix = self.compensation * loss_mix
