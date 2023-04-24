@@ -284,7 +284,7 @@ def model_train_parser():
     misc_args.add_argument(
         '-verbose',
         dest='verbose',
-        help='Optional: recording in tensorboard',
+        help='Optional: recording in tensorboard [example:1( meaning True)]',
         required=False,
         type=int,
         default=1
