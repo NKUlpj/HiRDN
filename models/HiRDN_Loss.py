@@ -60,8 +60,8 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        # perception_loss[0:3], dists_loss, l1_image_loss
-        self.loss_weights = [0.1, 1.5e-4, 1.5e-4, 0.005, 0.002]
+        # perception_loss[0:3], dists_loss, ms_l1_loss
+        self.loss_weights = [0.1, 1.5e-4, 1.5e-4, 0.001, 1]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
@@ -80,6 +80,7 @@ class LossL(nn.Module):
             _loss_network.to(self.device)
             _out_feat = _loss_network(out_images.repeat([1, 3, 1, 1]))
             _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
+            perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         ms_ssim_l1_loss = self.ms_ssim_l1_loss(out_images, target_images)
         dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
         return self.loss_weights[-2] * dists_loss + self.loss_weights[-1] * ms_ssim_l1_loss + perception_loss
@@ -91,7 +92,7 @@ class MS_SSIM_L1_LOSS(nn.Module):
     see paper "Loss Functions for Image Restoration With Neural Networks"
     """
     # TODO alpha
-    def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.025, compensation=200.0, channel=1):
+    def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.5, compensation=1.0, channel=1):
         super(MS_SSIM_L1_LOSS, self).__init__()
         gaussian_sigmas = [0.5, 1.0, 2.0, 4.0, 8.0]
         self.channel = channel

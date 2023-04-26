@@ -175,7 +175,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
                                    global_step=epoch * len(train_bar))
 
     # step5: save final ckpt
-    print(f'All epochs done. Running cost is {(time.time() - start) / 60:.1f} min.')
+    logging.debug(f'All epochs done. Running cost is {(time.time() - start) / 60:.1f} min.')
     torch.save(net.state_dict(), final_ckpt)
     if verbose:
         _val_writer.close()
@@ -198,9 +198,9 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
     net_g = _net_g.to(device)
     net_d = _net_d.to(device)
     log_info = f"netG parameter number: {sum(p.numel() for p in net_g.parameters() if p.requires_grad)}"
-    print(log_info)
+    logging.debug(log_info)
     log_info = f"netD parameter number: {sum(p.numel() for p in net_d.parameters() if p.requires_grad)}"
-    print(log_info)
+    logging.debug(log_info)
 
     # step 3: load loss
     criterion_g = get_loss_fn('DeepHiC').to(device)
@@ -324,7 +324,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
                                    global_step=epoch * len(train_bar))
 
     # step5: save final ckpt
-    print(f'All epochs done. Running cost is {(time.time() - start) / 60:.1f} min.')
+    logging.debug(f'All epochs done. Running cost is {(time.time() - start) / 60:.1f} min.')
     torch.save(net_g.state_dict(), final_ckpt)
 
     if verbose:

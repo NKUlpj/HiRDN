@@ -12,7 +12,11 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 from scipy.sparse import coo_matrix
+import logging
 
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 except_chr = {'hsa': {'X': 23, 23: 'X'}, 'mouse': {'X': 20, 20: 'X'}}
 
 
@@ -70,12 +74,12 @@ def down_sampling(matrix, down_ratio, verbose=False):
     Down sampling method.
     """
     if verbose:
-        print(f"[Down sampling] Matrix shape is {matrix.shape}")
+        logging.debug(f"[Down sampling] Matrix shape is {matrix.shape}")
     tag_mat, tag_len = dense2tag(matrix)
     sample_idx = np.random.choice(tag_len, tag_len // down_ratio)
     sample_tag = tag_mat[sample_idx]
     if verbose:
-        print(f'[Down sampling] Sampling 1/{down_ratio} of {tag_len} reads')
+        logging.debug(f'[Down sampling] Sampling 1/{down_ratio} of {tag_len} reads')
     down_mat = tag2dense(sample_tag, matrix.shape[0])
     return down_mat
 
@@ -113,9 +117,8 @@ def divide(
                 index.append((chr_num, size, i, j))
     result = np.array(result)
     if verbose:
-        print(
-            f'[Chr{chr_str}] Dividing HiC matrix ({size}x{size}) into {len(result)} samples with chunk={chunk_size}, '
-            f'stride={stride}, bound={bound}')
+        logging.debug(f'[Chr{chr_str}] Dividing HiC matrix ({size}x{size}) into {len(result)} samples '
+                      f'with chunk={chunk_size}, stride={stride}, bound={bound}')
     index = np.array(index)
     return result, index
 
@@ -128,7 +131,7 @@ def together(mat_list, indices, corp=0, species='hsa', tag='HiC'):
     # convert last element to str 'X'
     if chr_nums[-1] in except_chr[species]:
         chr_nums[-1] = except_chr[species][chr_nums[-1]]
-    print(f'{tag} data contain {chr_nums} chromosomes')
+    logging.debug(f'{tag} data contain {chr_nums} chromosomes')
     _, h, w = mat_list[0].shape
     results = dict.fromkeys(chr_nums)
     for n in chr_nums:
@@ -162,7 +165,7 @@ def pooling(mat, scale, pool_type='max', return_array=False, verbose=True):
     if return_array:
         out = out.squeeze().numpy()
     if verbose:
-        print('({}, {}) sized matrix is {} pooled to ({}, {}) size, with {}x{} down scale.'.format(
+        logging.debug('({}, {}) sized matrix is {} pooled to ({}, {}) size, with {}x{} down scale.'.format(
             *mat.shape[-2:], pool_type, *out.shape[-2:], scale, scale))
     return out
 

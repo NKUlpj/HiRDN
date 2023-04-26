@@ -5,12 +5,15 @@
 @Author: nkul
 @Date: 2023/4/10 下午12:30
 """
-
-
+import logging
 import os
 import argparse
 import textwrap
+import logging
 
+# 设置logging的等级以及打印格式
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - [%(levelname)s] %(message)s')
 
 # the Root directory for all raw and processed data
 root_dir = 'Datasets_NPZ'  # Example of root directory name
@@ -39,7 +42,7 @@ help_opt = (('--help', '-h'), {
 
 def mkdir(out_dir):
     if not os.path.isdir(out_dir):
-        print(f'Making directory: {out_dir}')
+        logging.debug(f'Making directory: {out_dir}')
     os.makedirs(out_dir, exist_ok=True)
 
 
