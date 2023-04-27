@@ -5,11 +5,17 @@
 @Author: nkul
 @Date: 2023/4/10 下午4:19
 """
+import logging
+import sys
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 from colormap import Color, Colormap
 import numpy as np
+
+from parser_helper import model_visual_parser
+from config import set_log_config
+set_log_config()
 
 
 def __plot_hic(matrix_data, v_max, colors=None):
@@ -40,35 +46,34 @@ def __plot_hic(matrix_data, v_max, colors=None):
     sns.heatmap(
         matrix_data.T,
         vmax=v_max,
-        vmin=0.05,
+        vmin=0.00,
         xticklabels=[],
         yticklabels=[],
         cmap=my_cmap,
         cbar=False)
 
 
-def __norm(x):
-    # 归一化
-    x = (x - x.min(axis=0)) / (x.max(axis=0) - x.min(axis=0))
-    return x
-
-
 def plot_hic(matrix, start, end, _percentile=95, name=None):
-    _matrix = matrix[start:end, start:end]
-    v_max = np.percentile(_matrix, _percentile)
-    __plot_hic(_matrix, v_max)
+    assert end - start <= 400, "distance boundary interested too large[<= 400 is recommended]"
+    __matrix = matrix[start:end, start:end]
+    v_max = np.percentile(__matrix, _percentile)
+    __plot_hic(__matrix, v_max)
     plt.tight_layout()
     if name is not None:
         plt.title(name)
         plt.savefig(f'{name}.png')
-    plt.show()
+        logging.debug(f'Save img to {name}.png')
+    else:
+        plt.show()
 
 
-def plot_hic_matrix(_matrix, name):
-    v_min = np.min(_matrix)
-    _matrix = _matrix + abs(v_min)
-    v_max = np.max(_matrix)
-    print(v_min, v_max)
-    __plot_hic(_matrix, 0.8, colors=['white', 'black'])
-    # plt.show()
-    plt.savefig(f'{name}')
+if __name__ == '__main__':
+    args = model_visual_parser().parse_args(sys.argv[1:])
+    _file = args.file
+    _s = int(args.start)
+    _e = int(args.end)
+    _p = int(args.percentile)
+    _n = args.name
+    _m = np.load(_file)['hic']
+    plot_hic(_m, _s, _e, _p, _n)
+

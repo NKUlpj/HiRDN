@@ -1,5 +1,8 @@
 # HiRDN
 
+![](./img/Compare.png)
+
+
 ## Data Preprocessing
 
 <b>In our experiments, we use the Hi-C data from (Rao et al. 2014).</b>
@@ -253,7 +256,7 @@ We have provided training file for all models:
 To train:
 
 **GPU acceleration is strongly recommended.**
-### All models exclude DeepHiC
+### All models
 ```text
 usage: train.py -m MODEL -t TRAIN_FILE -v VALID_FILE [-e EPOCHS] [-b BATCH_SIZE] [-verbose VERBOSE] [--help]
 

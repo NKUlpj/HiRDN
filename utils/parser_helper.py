@@ -10,7 +10,7 @@ import os
 import argparse
 import textwrap
 import logging
-from utils.config import set_log_config
+from config import set_log_config
 set_log_config()
 
 # the Root directory for all raw and processed data
@@ -338,3 +338,58 @@ def model_predict_parser():
     )
     parser.add_argument(*help_opt[0], **help_opt[1])
     return parser
+
+
+def model_visual_parser():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent('''\
+            Visualization
+            --------------------------------------------------------------------------------------------------
+            Use example : python visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -n 'chr4:14400-14800'
+            --------------------------------------------------------------------------------------------------
+        '''
+                                    ),
+        add_help=False)
+
+    misc_args = parser.add_argument_group('Miscellaneous Arguments')
+
+    misc_args.add_argument(
+        '-f',
+        dest='file',
+        help='Required: a npy file out from predict',
+        required=True,
+    )
+
+    misc_args.add_argument(
+        '-s',
+        dest='start',
+        help='Required: start bin[example: 14400]',
+        required=True,
+        type=int
+    )
+    misc_args.add_argument(
+        '-e',
+        dest='end',
+        help='Required: end bin[example: 14800]',
+        required=True,
+        type=int
+    )
+    misc_args.add_argument(
+        '-p',
+        dest='percentile',
+        help='Optional: percentile of max, the default is 95.',
+        required=False,
+        default=95,
+        type=int
+    )
+    misc_args.add_argument(
+        '-n',
+        dest='name',
+        help='Optional: the name of pic[example: chr4:14400-14800]',
+        required=False,
+        type=str
+    )
+    parser.add_argument(*help_opt[0], **help_opt[1])
+    return parser
+
