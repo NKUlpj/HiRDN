@@ -24,10 +24,8 @@ import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
 import compared_models.DeepHiC_Loss as DeepHiC_Loss
 from utils.parser_helper import root_dir
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 
 # get model by name

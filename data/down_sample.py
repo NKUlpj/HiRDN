@@ -20,10 +20,8 @@ sys.path.append(root_path)
 from utils.parser_helper import *
 from utils.io_helper import down_sampling
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 
 def down_sample(in_file, _low_res, _ratio):

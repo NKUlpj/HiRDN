@@ -18,10 +18,8 @@ import numpy as np
 import multiprocessing
 import time
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 
 def data_divider(

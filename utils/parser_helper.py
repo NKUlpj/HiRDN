@@ -10,10 +10,8 @@ import os
 import argparse
 import textwrap
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 # the Root directory for all raw and processed data
 root_dir = 'Datasets_NPZ'  # Example of root directory name

@@ -23,15 +23,13 @@ from utils.util_func import get_model, loader, get_device
 import warnings
 warnings.filterwarnings("ignore")
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 
 def __save_data(data, file):
     np.savez_compressed(file, hic=data)
-    logging.debug(f'Saving file:{file}')
+    logging.debug(f'Saving file - {file}')
 
 
 def __data_info(data):
@@ -97,7 +95,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     model, _padding, _, = get_model(model_name)
 
     # 2) Load File
-    logging.debug(f'Loading predict data: {predict_file}')
+    logging.debug(f'Loading predict data - {predict_file}')
     # Load Predict Data
     in_dir = os.path.join(root_dir, 'data')
     predict_file_path = os.path.join(in_dir, predict_file)

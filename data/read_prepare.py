@@ -36,10 +36,8 @@ import multiprocessing
 import time
 
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 
 def read_data(data_file, norm_file, _out_dir, _resolution):

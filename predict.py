@@ -14,10 +14,8 @@ import numpy as np
 from utils.parser_helper import model_predict_parser, root_dir
 from model_predict import model_predict
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 
 
 def __save_data(data, file, verbose=False):

@@ -13,10 +13,10 @@ import torch
 import torch.nn.functional as F
 from scipy.sparse import coo_matrix
 import logging
+from utils.config import set_log_config
+set_log_config()
 
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+
 except_chr = {'hsa': {'X': 23, 23: 'X'}, 'mouse': {'X': 20, 20: 'X'}}
 
 

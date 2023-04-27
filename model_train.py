@@ -25,10 +25,8 @@ from utils.util_func import get_device, get_model, loader, get_loss_fn
 import warnings
 warnings.filterwarnings("ignore")
 import logging
-
-# 设置logging的等级以及打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - [%(levelname)s] %(message)s')
+from utils.config import set_log_config
+set_log_config()
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -60,6 +58,8 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     os.makedirs(out_dir, exist_ok=True)
     best_ckpt = os.path.join(out_dir, f'best_{model_name}.pytorch')
     final_ckpt = os.path.join(out_dir, f'final_{model_name}.pytorch')
+    logging.debug(f'BEST_CKPT file is stored as {best_ckpt}')
+    logging.debug(f'FINAL_CKPT file is stored as {final_ckpt}')
     start = time.time()
     device = get_device()  # whether using GPU for training
     best_ssim = 0
