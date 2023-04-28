@@ -22,6 +22,7 @@ import models.HiRDN as HiRDN
 import models.HiRDN_Loss as HiRDN_Loss
 import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
 import compared_models.DeepHiC_Loss as DeepHiC_Loss
+import compared_models.HiCSR_Loss as HiCSR_Loss
 from utils.parser_helper import root_dir
 import logging
 from utils.config import set_log_config
@@ -92,6 +93,17 @@ def get_device():
     return _device
 
 
+def get_d_loss_fn(_model_name):
+    if _model_name == 'DeepHiC':
+        logging.debug(f"DeepHiC is using BCELoss as D_Loss")
+        return torch.nn.BCELoss()
+    elif _model_name == 'HiCSR':
+        logging.debug(f"HiCSR is using BCEWithLogitsLoss as D_Loss")
+        return torch.nn.BCEWithLogitsLoss()
+    else:
+        raise NotImplementedError(f'{_model_name} has not implemented')
+
+
 def get_loss_fn(_model_name, device='cpu'):
     if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
         logging.debug('Using HiRDN_T_Loss')
@@ -102,6 +114,9 @@ def get_loss_fn(_model_name, device='cpu'):
     elif _model_name == 'DeepHiC':
         logging.debug('Using DeepHiC_Loss')
         loss = DeepHiC_Loss.GeneratorLoss()
+    elif _model_name == 'HiCSR':
+        logging.debug('Using HiCSR_Loss')
+        loss = HiCSR_Loss.GeneratorLoss()
     else:
         logging.debug('Using HiCARN_Loss')
         loss = HiCARN_1_Loss.GeneratorLoss()

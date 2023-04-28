@@ -21,7 +21,7 @@ from utils.ssim import ssim
 from math import log10
 import lpips
 from DISTS_pytorch import DISTS
-from utils.util_func import get_device, get_model, loader, get_loss_fn
+from utils.util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
 import warnings
 warnings.filterwarnings("ignore")
 import logging
@@ -58,8 +58,8 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     os.makedirs(out_dir, exist_ok=True)
     best_ckpt = os.path.join(out_dir, f'best_{model_name}.pytorch')
     final_ckpt = os.path.join(out_dir, f'final_{model_name}.pytorch')
-    logging.debug(f'BEST_CKPT file is stored as {best_ckpt}')
-    logging.debug(f'FINAL_CKPT file is stored as {final_ckpt}')
+    logging.debug(f'BEST_CKPT file is stored at {best_ckpt}')
+    logging.debug(f'FINAL_CKPT file is stored at {final_ckpt}')
     start = time.time()
     device = get_device()  # whether using GPU for training
     best_ssim = 0
@@ -203,8 +203,8 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
     logging.debug(log_info)
 
     # step 3: load loss
-    criterion_g = get_loss_fn('DeepHiC').to(device)
-    criterion_d = torch.nn.BCELoss().to(device)
+    criterion_g = get_loss_fn(model_name).to(device)
+    criterion_d = get_d_loss_fn(model_name).to(device)
 
     # optimizer
     optimizer_g = optim.Adam(net_g.parameters(), lr=0.0001)
@@ -242,11 +242,16 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
             ###########################
             net_d.zero_grad()
             real_out = net_d(real_img)
+            real_label = torch.ones_like(real_out, requires_grad=False).to(device)
+
             fake_out = net_d(fake_img)
-            d_loss_real = criterion_d(real_out, torch.ones_like(real_out))
-            d_loss_fake = criterion_d(fake_out, torch.zeros_like(fake_out))
+            fake_label = torch.zeros_like(fake_out, requires_grad=False).to(device)
+
+            d_loss_real = criterion_d(real_out, real_label)
+            d_loss_fake = criterion_d(fake_out, fake_label)
             d_loss = d_loss_real + d_loss_fake
             d_loss.backward(retain_graph=True)
+            # d_loss.backward()
             optimizer_d.step()
 
             ############################
