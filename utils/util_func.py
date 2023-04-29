@@ -95,10 +95,10 @@ def get_device():
 
 def get_d_loss_fn(_model_name):
     if _model_name == 'DeepHiC':
-        logging.debug(f"DeepHiC is using BCELoss as D_Loss")
+        logging.debug(f"Using BCELoss as D_Loss")
         return torch.nn.BCELoss()
     elif _model_name == 'HiCSR':
-        logging.debug(f"HiCSR is using BCEWithLogitsLoss as D_Loss")
+        logging.debug(f"Using BCEWithLogitsLoss as D_Loss")
         return torch.nn.BCEWithLogitsLoss()
     else:
         raise NotImplementedError(f'{_model_name} has not implemented')

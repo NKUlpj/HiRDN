@@ -63,5 +63,3 @@ class GeneratorLoss(nn.Module):
         image_loss = self.l1_loss(out_images, target_images)
         feature_loss = sum(self.feature_loss(out_images, target_images))
         return image_loss + feature_loss
-
-
