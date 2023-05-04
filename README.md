@@ -14,7 +14,7 @@ You can view the data on NCBI via accession [GSE62525](https://www.ncbi.nlm.nih.
 * [CH12-LX](https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE63525&format=file&file=GSE63525%5FCH12%2DLX%5Fintrachromosomal%5Fcontact%5Fmatrices%2Etar%2Egz) (mouse) intrachromosomal
 
 
-<span style="color: red; "> ！！！ FOLLOW THE STEPS CAREFULLY！！！</span>
+$$ {\color{blue}!!! FOLLOW THE STEPS CAREFULLY !!!} $$
 
 
 ### 0. Set work directory
@@ -189,11 +189,9 @@ Method Arguments:
 
 ```
 
-<span style="color: red; "> 
-Note: For training, you must have both training and validation files present in
+> __Note__  For training, you must have both training and validation files present in
 $root_dir/data. 
 Change the option -s to generate the validation and other datasets needed 
-</span>
 
 ---
 After doing that,your dir should be like this
@@ -268,7 +266,7 @@ To train:
 
 **GPU acceleration is strongly recommended.**
 ### All models
-$$ {\color{red}！！！NOTE！！！} $$
+$$ {\color{red}!!! NOTE !!!} $$
 
 1. Do not use absolute paths
 2. Put your train/valid/test data in `$root/data/{your path/ your filename}`
