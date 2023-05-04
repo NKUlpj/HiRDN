@@ -19,14 +19,16 @@ import compared_models.HiCARN_1 as HiCARN
 import compared_models.HiCNN as HiCNN
 import compared_models.DeepHiC as DeepHiC
 import compared_models.HiCSR as HiCSR
-import models.HiRDN as HiRDN
-import models.HiRDN_Loss as HiRDN_Loss
 import compared_models.HiCARN_1_Loss as HiCARN_1_Loss
 import compared_models.DeepHiC_Loss as DeepHiC_Loss
 import compared_models.HiCSR_Loss as HiCSR_Loss
-from utils.parser_helper import root_dir
+
+import models.HiRDN as HiRDN
+import models.HiRDN_Loss as HiRDN_Loss
+
+from parser_helper import root_dir
 import logging
-from utils.config import set_log_config
+from config import set_log_config
 set_log_config()
 
 

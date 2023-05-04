@@ -11,7 +11,7 @@ ALL IN ONE
 import torch
 import torch.nn as nn
 
-from models.Common import *
+from Common import *
 
 
 class Scale(nn.Module):

@@ -13,7 +13,7 @@ import torch
 import torch.nn.functional as F
 from scipy.sparse import coo_matrix
 import logging
-from utils.config import set_log_config
+from config import set_log_config
 set_log_config()
 
 

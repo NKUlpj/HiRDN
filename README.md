@@ -317,6 +317,29 @@ Miscellaneous Arguments:
 ### Predict on matrix
 - [ ] todo
 
+
+## Visualization
+
+```shell
+usage: visualization.py -f FILE -s START -e END [-p PERCENTILE] [-n NAME] [--help]
+
+Visualization
+--------------------------------------------------------------------------------------------------
+Use example : python visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -n 'chr4:14400-14800'
+--------------------------------------------------------------------------------------------------
+
+optional arguments:
+  --help, -h     Print this help message and exit
+
+Miscellaneous Arguments:
+  -f FILE        Required: a npy file out from predict
+  -s START       Required: start bin[example: 14400]
+  -e END         Required: end bin[example: 14800]
+  -p PERCENTILE  Optional: percentile of max, the default is 95.
+  -n NAME        Optional: the name of pic[example: chr4:14400-14800]
+
+```
+
 ## Appendix
 The output predictions are stored in .npz files that contain numpy arrays under keys.
 
@@ -337,7 +360,3 @@ hic_matrix = np.load("path/to/file.npz", allow_pickle=True)['hic']
 
 1. [DeepHiC](https://github.com/omegahh/DeepHiC) : some code for data processing.
     * utils/io_helper.py
-2. [HiCARN](https://github.com/OluwadareLab/HiCARN/): collection for related models.
-    * HiCARN_1.py
-    * HiCNN.py
-    * HiCSR.py 

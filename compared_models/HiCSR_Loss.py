@@ -8,8 +8,12 @@
 # -*- coding: UTF-8 -*-
 import torch
 import torch.nn as nn
-from .HiCSR import DAE
+import sys
 import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+from compared_models.HiCSR import DAE
 
 
 class FeatureReconstructionLoss(nn.Module):

@@ -11,7 +11,6 @@ import os
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 
-
 from utils.parser_helper import *
 from utils.io_helper import divide
 import numpy as np

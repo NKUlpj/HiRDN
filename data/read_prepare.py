@@ -24,11 +24,11 @@ Datasets_NPZ
 output: .npz
 """
 
-import sys
 import os
-
+import sys
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
+
 from utils.parser_helper import *
 from utils.io_helper import *
 import numpy as np

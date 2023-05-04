@@ -6,11 +6,11 @@
 @Date: 2023/4/10 下午1:56
 """
 
+from Common import *
+from Component import HiDB, UBlock
+import logging
 import torch
 import torch.nn as nn
-from .Common import *
-from .Component import HiDB, UBlock
-import logging
 from utils.config import set_log_config
 set_log_config()
 

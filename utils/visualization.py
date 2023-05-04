@@ -7,6 +7,9 @@
 """
 import logging
 import sys
+import os
+root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_path)
 
 import matplotlib.pyplot as plt
 import seaborn as sns

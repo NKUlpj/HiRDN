@@ -6,7 +6,7 @@
 @Date: 2023/4/10 下午1:50
 """
 from collections import OrderedDict
-from models.Attention import *
+from Attention import *
 
 
 # private func
@@ -82,7 +82,7 @@ __attention_dict = {
     'HiCBAM': HiCBAM,
     'LKA': LKA,
     'PA': PA,
-    'HiConvMod':HiConvMod
+    'HiConvMod': HiConvMod
 }
 
 
@@ -93,20 +93,6 @@ def get_attn_by_name(name, channels):
     if name not in __attention_dict:
         raise NotImplementedError('Attention layer [{:s}] is not found'.format(name))
     return __attention_dict[name](channels)
-    # if name == 'ConvMod':
-    #     return ConvMod(channels)
-    # elif name == 'CA':
-    #     return CA(channels)
-    # elif name == 'CWSA':
-    #     return ChannelWiseSpatialAttention(channels)
-    # elif name == 'HiCBAM':
-    #     return HiCBAM(channels)
-    # elif name == 'ESA':
-    #     return ESA(channels, nn.Conv2d)
-    # elif name == 'None':
-    #     return None
-    # else:
-    #     raise NotImplementedError('Attention layer [{:s}] is not found'.format(name))
 
 
 def conv_layer(in_channels, out_channels, kernel_size, stride=1, dilation=1, groups=1):
