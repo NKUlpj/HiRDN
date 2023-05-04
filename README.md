@@ -14,7 +14,7 @@ You can view the data on NCBI via accession [GSE62525](https://www.ncbi.nlm.nih.
 * [CH12-LX](https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE63525&format=file&file=GSE63525%5FCH12%2DLX%5Fintrachromosomal%5Fcontact%5Fmatrices%2Etar%2Egz) (mouse) intrachromosomal
 
 
-$$ {\color{blue}!!! FOLLOW THE STEPS CAREFULLY !!!} $$
+$$ {\color{blue}!!!\ FOLLOW\ THE\ STEPS\ CAREFULLY\ !!!} $$
 
 
 ### 0. Set work directory
