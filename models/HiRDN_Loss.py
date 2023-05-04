@@ -60,10 +60,7 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        # perception_loss[0:3], dists_loss, ms_l1_loss
-        # self.loss_weights = [0.08, 1.5e-4, 1.5e-4, 0.001, 1]  # [HiRDN_L_1.pytorch]
-        # self.loss_weights = [0.08, 0.0004, 0.0004, 0.01, 1]  # 0.15
-        self.loss_weights = [0.04, 0.04, 0.04, 0.05, 0.85]
+        self.loss_weights = [0.04, 1.5e-4, 1.5e-4, 0.04, 1]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
