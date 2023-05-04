@@ -4,6 +4,7 @@
 @File: HiCARN_1_Loss.py.py
 @Author: nkul
 @Date: 2023/4/10 下午1:24
+# Code from https://github.com/OluwadareLab/HiCARN
 """
 
 import torch

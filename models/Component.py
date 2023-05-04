@@ -16,7 +16,7 @@ from models.Common import *
 
 class Scale(nn.Module):
     """
-    Input x
+    Input x [B, C, H, W]
     return lambda * x
     """
     def __init__(self, init_value=1) -> None:
@@ -30,7 +30,7 @@ class Scale(nn.Module):
 class ResidualUnit(nn.Module):
     def __init__(self, channels, kernel_size=3, reduction=2, bias=True) -> None:
         super(ResidualUnit, self).__init__()
-        '''
+        r'''
         in:         [C * W * H]
         reduction:  [C * W * H]   ---> [C/2 * W * H]
         expansion:  [C/2 * W * H] ---> [C * W * H]
@@ -49,8 +49,13 @@ class ResidualUnit(nn.Module):
 
 
 class HiFM(nn.Module):
+
     def __init__(self, channels, mode, k=2) -> None:
         super(HiFM, self).__init__()
+        r'''
+        in:         [C * W * H]
+        out:        [C/2 * W * H]
+        '''
         self.k = k
         self.net = nn.Sequential(
             nn.AvgPool2d(kernel_size=self.k, stride=self.k),
@@ -73,6 +78,10 @@ class HiFM(nn.Module):
 class HiDB(nn.Module):
     def __init__(self, channels, mode) -> None:
         super(HiDB, self).__init__()
+        r'''
+        in:         [C * W * H]
+        out:        [C * W * H]
+        '''
         hidden_channels = channels // 2
 
         self.c1_r = ResidualUnit(channels)

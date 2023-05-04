@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 
 
 class LossT(nn.Module):
-    """
+    r""" Abandoned
     Loss_T = [r1 * vgg(1) + r2 * vgg(15) + r3 * vgg(25)] + alpha * dists_loss + beta * l1_loss
     """
     def __init__(self, device):
@@ -90,8 +90,8 @@ class LossL(nn.Module):
 
 class MS_SSIM_L1_LOSS(nn.Module):
     """
-    Code from https://github.com/psyrocloud/MS-SSIM_L1_LOSS
-    see paper "Loss Functions for Image Restoration With Neural Networks"
+    some code from https://github.com/psyrocloud/MS-SSIM_L1_LOSS
+    https://arxiv.org/pdf/1511.08861.pdf
     """
     # TODO alpha
     def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.84, compensation=1, channel=1):

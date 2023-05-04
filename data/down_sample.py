@@ -19,7 +19,7 @@ sys.path.append(root_path)
 from utils.parser_helper import *
 from utils.io_helper import down_sampling
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir
 set_log_config()
 
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     for file in in_files:
         down_sample(file, low_res, ratio)
     '''
-    # I'm not sure why using multithreading on my computer can cause problems
+    # I'm not sure why using multithreading on my computer will cause problems
     # But, synchronized code does not spend too much time [8 min]
     # It will be ok
     logging.debug(f'Start a multiprocess pool with process_num = {pool_num}')
@@ -64,4 +64,3 @@ if __name__ == '__main__':
     pool.join()
     '''
     logging.debug(f'All down_sampling processes done. Running cost is {(time.time()-start)/60:.1f} min.')
-

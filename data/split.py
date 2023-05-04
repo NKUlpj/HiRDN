@@ -11,13 +11,13 @@ import os
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 
-from utils.parser_helper import *
+from utils.parser_helper import data_divider_parser, mkdir
 from utils.io_helper import divide
 import numpy as np
 import multiprocessing
 import time
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir, set_dict
 set_log_config()
 
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     start = time.time()
     '''
-    # I'm not sure why using multithreading on my computer can cause problems
+    # I'm not sure why using multithreading on my computer will cause problems
     # But, synchronized code does not spend too much time[1 min]
     # It will be ok
     pool = multiprocessing.Pool(processes=pool_num)
@@ -111,4 +111,3 @@ if __name__ == '__main__':
         inds=inds,
         sizes=sizes)
     logging.debug(f'Saving file:{split_file}')
-

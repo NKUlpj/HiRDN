@@ -26,9 +26,8 @@ import compared_models.HiCSR_Loss as HiCSR_Loss
 import models.HiRDN as HiRDN
 import models.HiRDN_Loss as HiRDN_Loss
 
-from utils.parser_helper import root_dir
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir
 set_log_config()
 
 

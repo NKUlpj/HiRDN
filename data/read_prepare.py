@@ -29,14 +29,14 @@ import sys
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 
-from utils.parser_helper import *
+from utils.parser_helper import data_read_parser, res_map, mkdir
 from utils.io_helper import *
 import numpy as np
 import multiprocessing
 import time
 
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir
 set_log_config()
 
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     for data_fn, norm_fn in zip(data_files, norm_files):
         read_data(data_fn, norm_fn, out_dir, res_map[resolution])
     '''
-    # I'm not sure why using multithreading on my computer can cause problems
+    # I'm not sure why using multithreading on my computer will cause problems
     # But, synchronized code does not spend too much time
     # It will be ok
     pool = multiprocessing.Pool(processes=pool_num)
@@ -101,4 +101,3 @@ if __name__ == '__main__':
     pool.join()
     '''
     logging.debug(f'All reading processes done. Running cost is {(time.time()-start)/60:.1f} min.')
-

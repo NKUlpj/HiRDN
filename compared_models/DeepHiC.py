@@ -4,6 +4,7 @@
 @File: DeepHiC.py
 @Author: nkul
 @Date: 2023/4/10 下午1:17
+# Code was taken from https://github.com/omegahh/DeepHiC
 """
 
 import torch

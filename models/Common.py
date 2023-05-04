@@ -9,7 +9,7 @@ from collections import OrderedDict
 from models.Attention import *
 
 
-# private func
+# ================== private func start ==========================
 def __get_norm(norm_type, hidden_channels):
     norm_type = norm_type.lower()
     if norm_type == 'batch':
@@ -74,7 +74,7 @@ def get_act_fn(act_type, inplace=True, neg_slope=0.05, n_prelu=1):
     else:
         raise NotImplementedError('activation layer [{:s}] is not found'.format(act_type))
     return layer
-# private func end
+# ================== private func end ==========================
 
 
 __attention_dict = {
@@ -86,7 +86,7 @@ __attention_dict = {
 }
 
 
-# public func
+# ================== public func start ==========================
 def get_attn_by_name(name, channels):
     if name == 'None':
         return None

@@ -11,10 +11,10 @@ import sys
 
 import numpy as np
 
-from utils.parser_helper import model_predict_parser, root_dir
+from utils.parser_helper import model_predict_parser
 from model_predict import model_predict
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir
 set_log_config()
 
 

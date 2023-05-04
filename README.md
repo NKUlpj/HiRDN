@@ -19,7 +19,7 @@ $$ {\color{blue}!!!\ FOLLOW\ THE\ STEPS\ CAREFULLY\ !!!} $$
 
 ### 0. Set work directory
 
-i. Create your root directory and write in `/utils/parser_helper.py`;
+i. Create your root directory and write in `/utils/config.py`;
 
 For example, we set `root_dir = './Datasets_NPZ'`
 
@@ -151,7 +151,7 @@ Datasets_NPZ
 </details>
 
 ### 3. Generate train, validation and test datasets
-* you can set your desired chromosomes for each set in `utils/parser_helper.py` within the `set_dict` dictionary.
+* you can set your desired chromosomes for each set in `utils/config.py` within the `set_dict` dictionary.
 * This specific example will create a file in `$root_dir/data` named xxx_train.npz.
 
 ```python
@@ -266,7 +266,7 @@ To train:
 
 **GPU acceleration is strongly recommended.**
 ### All models
-$$ {\color{red}!!! NOTE !!!} $$
+$$ {\color{red}!!!\ NOTE\ !!!} $$
 
 1. Do not use absolute paths
 2. Put your train/valid/test data in `$root/data/{your path/ your filename}`

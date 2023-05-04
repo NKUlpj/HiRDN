@@ -14,7 +14,6 @@ import torch
 
 from utils.evaluating import eval_lpips, eval_dists
 from utils.io_helper import together
-from utils.parser_helper import root_dir
 from utils.ssim import ssim
 from math import log10
 import lpips
@@ -23,7 +22,7 @@ from utils.util_func import get_model, loader, get_device
 import warnings
 warnings.filterwarnings("ignore")
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir
 set_log_config()
 
 

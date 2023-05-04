@@ -4,6 +4,7 @@
 @File: DeepHiC_Loss.py
 @Author: nkul
 @Date: 2023/4/10 下午1:20
+# Code was taken from https://github.com/omegahh/DeepHiC
 """
 import torch
 import torch.nn as nn

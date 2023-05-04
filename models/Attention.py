@@ -11,9 +11,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# Rewrite Layer Norm, see the issue in ConvNeXt Repo
 class LayerNorm(nn.Module):
     r""" From ConvNeXt (https://arxiv.org/pdf/2201.03545.pdf)
+    why rewrite F.layer_norm ?
+    see https://github.com/facebookresearch/ConvNeXt/issues/112
     """
 
     def __init__(self, normalized_shape, eps=1e-6, data_format="channels_last"):
@@ -38,8 +39,11 @@ class LayerNorm(nn.Module):
 
 
 # Former-Style Spatial Attention
-# See ref Conv2Former
 class ConvMod(nn.Module):
+    r"""Conv2Former
+    https://arxiv.org/abs/2211.11943
+    https://github.com/HVision-NKU/Conv2Former
+    """
     def __init__(self, channels):
         super().__init__()
         self.norm = LayerNorm(channels, eps=1e-6, data_format='channels_first')
@@ -122,6 +126,9 @@ class HiCBAM(nn.Module):
 
 
 class LKA(nn.Module):
+    r"""
+    https://arxiv.org/abs/2202.09741
+    """
     def __init__(self, channels):
         super(LKA, self).__init__()
         self.conv0 = nn.Conv2d(channels, channels, 9, padding='same', groups=channels)

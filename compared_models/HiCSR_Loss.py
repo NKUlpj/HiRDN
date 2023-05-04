@@ -3,16 +3,13 @@
 @Project: HiRDN 
 @File: HiCSR_Loss.py
 @Author: nkul
-@Date: 2023/4/28 下午3:09 
+@Date: 2023/4/28 下午3:09
+# Code was taken from https://github.com/PSI-Lab/HiCSR
 """
 # -*- coding: UTF-8 -*-
+import os
 import torch
 import torch.nn as nn
-import sys
-import os
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 from compared_models.HiCSR import DAE
 
 

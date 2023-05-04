@@ -5,16 +5,12 @@
 @Author: nkul
 @Date: 2023/4/10 下午12:30
 """
-import logging
 import os
 import argparse
 import textwrap
 import logging
 from .config import set_log_config
 set_log_config()
-
-# the Root directory for all raw and processed data
-root_dir = 'Datasets_NPZ'  # Example of root directory name
 
 res_map = {
     '5kb': 5_000,
@@ -26,12 +22,6 @@ res_map = {
     '500kb': 500_000,
     '1mb': 1_000_000}
 
-# 'train' and 'valid' can be changed for different train/valid set splitting
-set_dict = {'K562_test': [3, 11, 19, 21],
-            'mESC_test': (4, 9, 15, 18),
-            'train': [1, 3, 5, 7, 8, 9, 11, 13, 15, 17, 18, 19, 21, 22],
-            'valid': [2, 6, 10, 12],
-            'GM12878_test': (4, 14, 16, 20)}
 
 help_opt = (('--help', '-h'), {
     'action': 'help',

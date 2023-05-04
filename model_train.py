@@ -16,7 +16,6 @@ import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from utils.evaluating import eval_lpips, eval_dists
-from utils.parser_helper import root_dir
 from utils.ssim import ssim
 from math import log10
 import lpips
@@ -25,7 +24,7 @@ from utils.util_func import get_device, get_model, loader, get_loss_fn, get_d_lo
 import warnings
 warnings.filterwarnings("ignore")
 import logging
-from utils.config import set_log_config
+from utils.config import set_log_config, root_dir
 set_log_config()
 from torch.utils.tensorboard import SummaryWriter
 
