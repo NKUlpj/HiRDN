@@ -227,7 +227,13 @@ Datasets_NPZ
 * `makedir $root_dir/mat/<cell_name>`
 
 #### prepare .npz data
-<i>Note: Data in following instruction is just for showing how to process your data. They cannot be used because the size of mat is too small to divide.</i>
+>__Note__  Most common Hi-C file formats, such as [.cool](https://github.com/open2c/cooler) and [.hic](https://github.com/aidenlab/straw).
+> can be easily converted to numpy matrix.
+> Other formats can be converted into transition formats using [HiCExplorer](https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html) to generate numpy matrices.
+
+
+
+>__Warning__ Data in following instruction is just for showing how to process your data. They cannot be used because the size of mat is too small to divide.</i>
 ```python
 # asumming that 'mat' is a two-dimensional numpy.ndarray which stores the Hi-C matrix.
 import numpy as np
