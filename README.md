@@ -356,7 +356,7 @@ Method Arguments:
 
 ```
 
-4. run shell `python predict.py -h` to predict [[same as predict-on-down_sample-data]]("#predict-on-down_sample-data")
+4. run shell `python predict.py -h` to predict [[same as predict-on-down_sample-data]](#predict-on-down_sample-data)
 
 ## Visualization
 
