@@ -189,7 +189,8 @@ Method Arguments:
 
 ```
 
-> __Note__  For training, you must have both training and validation files present in
+> __Note__  
+> For training, you must have both training and validation files present in
 $root_dir/data. 
 Change the option -s to generate the validation and other datasets needed 
 
@@ -227,13 +228,15 @@ Datasets_NPZ
 * `makedir $root_dir/mat/<cell_name>`
 
 #### prepare .npz data
->__Note__  Most common Hi-C file formats, such as [.cool](https://github.com/open2c/cooler) and [.hic](https://github.com/aidenlab/straw).
+>__Note__  
+> Most common Hi-C file formats, such as [.cool](https://github.com/open2c/cooler) and [.hic](https://github.com/aidenlab/straw).
 > can be easily converted to numpy matrix.
 > Other formats can be converted into transition formats using [HiCExplorer](https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html) to generate numpy matrices.
 
 
 
->__Warning__ Data in following instruction is just for showing how to process your data. They cannot be used because the size of mat is too small to divide.</i>
+>__Warning__ 
+> Data in following instruction is just for showing how to process your data. They cannot be used because the size of mat is too small to divide.</i>
 ```python
 # asumming that 'mat' is a two-dimensional numpy.ndarray which stores the Hi-C matrix.
 import numpy as np
