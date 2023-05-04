@@ -81,7 +81,8 @@ __attention_dict = {
     'CA': CA,
     'HiCBAM': HiCBAM,
     'LKA': LKA,
-    'PA': PA
+    'PA': PA,
+    'HiConvMod':HiConvMod
 }
 
 

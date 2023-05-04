@@ -11,6 +11,7 @@ import os
 
 import numpy as np
 import torch
+import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import torch.nn.functional as F
 
@@ -107,7 +108,7 @@ def get_d_loss_fn(_model_name):
 def get_loss_fn(_model_name, device='cpu'):
     if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
         logging.debug('Using HiRDN_T_Loss')
-        loss = HiRDN_Loss.LossT(device=device)
+        loss = HiRDN_Loss.LossL(device=device)
     elif _model_name == 'HiRDN_L':
         logging.debug('Using HiRDN_L_Loss')
         loss = HiRDN_Loss.LossL(device=device)
@@ -117,6 +118,9 @@ def get_loss_fn(_model_name, device='cpu'):
     elif _model_name == 'HiCSR':
         logging.debug('Using HiCSR_Loss')
         loss = HiCSR_Loss.GeneratorLoss()
+    elif _model_name == 'HiCNN':
+        logging.debug('Using HiCNN_Loss')
+        loss = nn.MSELoss()
     else:
         logging.debug('Using HiCARN_Loss')
         loss = HiCARN_1_Loss.GeneratorLoss()
