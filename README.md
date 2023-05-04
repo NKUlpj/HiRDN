@@ -268,7 +268,7 @@ To train:
 
 **GPU acceleration is strongly recommended.**
 ### All models
-<span style="color: red; "> ！！！ NOTE ！！！</span>
+$$ {\color{red}！！！NOTE！！！} $$
 
 1. Do not use absolute paths
 2. Put your train/valid/test data in `$root/data/{your path/ your filename}`
@@ -357,6 +357,7 @@ Miscellaneous Arguments:
   -n NAME        Optional: the name of pic[example: chr4:14400-14800]
 
 ```
+
 
 ## Appendix
 The output predictions are stored in .npz files that contain numpy arrays under keys.
