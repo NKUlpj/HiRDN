@@ -12,5 +12,5 @@ if __name__ == '__main__':
         f"For down sample data, run: python ./data/down_sample.py -h\n",
         f"For split data, run: python ./data/split.py -h\n",
         f"For train, run: python ./train.py -h\n",
-        f"For predict, run: python ./predict.py -h\n"
+        f"For predict, run: python ./predict.py -h"
     )

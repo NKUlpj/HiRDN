@@ -75,15 +75,24 @@ def loader(file_name, loader_type='Train', padding=False, shuffle=True, batch_si
     __input_tensor = torch.tensor(__input_np, dtype=torch.float)
     if padding:
         __input_tensor = F.pad(__input_tensor, (6, 6, 6, 6), mode='constant')
-    __target_np = __file_np['target']
-    __target_tensor = torch.tensor(__target_np, dtype=torch.float)
 
     __inds_np = __file_np['inds']
     __inds_tensor = torch.tensor(__inds_np, dtype=torch.int)
     logging.debug(f"{loader_type} Set Size - {__input_tensor.size()}")
-    __dataset = TensorDataset(__input_tensor, __target_tensor, __inds_tensor)
-    __data_loader = DataLoader(__dataset, batch_size=batch_size, shuffle=shuffle, drop_last=True)
-    return __data_loader
+
+    __has_target = False
+
+    if 'target' in __file_np.keys():
+        __has_target = True
+        __target_np = __file_np['target']
+        __target_tensor = torch.tensor(__target_np, dtype=torch.float)
+        __dataset = TensorDataset(__input_tensor, __target_tensor, __inds_tensor)
+        __data_loader = DataLoader(__dataset, batch_size=batch_size, shuffle=shuffle, drop_last=True)
+    else:
+        __dataset = TensorDataset(__input_tensor, __inds_tensor)
+        __data_loader = DataLoader(__dataset, batch_size=batch_size, shuffle=shuffle, drop_last=True)
+
+    return __data_loader, __has_target
 
 
 def get_device():

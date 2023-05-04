@@ -383,3 +383,52 @@ def model_visual_parser():
     parser.add_argument(*help_opt[0], **help_opt[1])
     return parser
 
+
+def split_matrix_parser():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent('''\
+                A tools to generate data for predict.
+                ----------------------------------------------------------------------------------------------------------
+                Use example : python ./data/split_matrix.py -chunk 64 -stride 64 -bound 201 -c GM12878
+                ----------------------------------------------------------------------------------------------------------
+            '''
+                                    ),
+        add_help=False
+    )
+
+    req_args = parser.add_argument_group('Required Arguments')
+
+    req_args.add_argument(
+        '-c',
+        dest='cell_line',
+        help='Required: Cell line for analysis[example:GM12878]',
+        required=True
+    )
+    method_args = parser.add_argument_group('Method Arguments')
+    method_args.add_argument(
+        '-chunk',
+        dest='chunk',
+        help='Required: chunk size for dividing[example:64]',
+        default=64,
+        type=int,
+        required=True
+    )
+    method_args.add_argument(
+        '-stride',
+        dest='stride',
+        help='Required: stride for dividing[example:64]',
+        default=64,
+        type=int,
+        required=True
+    )
+    method_args.add_argument(
+        '-bound',
+        dest='bound',
+        help='Required: distance boundary interested[example:201]',
+        default=201,
+        type=int,
+        required=True
+    )
+    parser.add_argument(*help_opt[0], **help_opt[1])
+    return parser

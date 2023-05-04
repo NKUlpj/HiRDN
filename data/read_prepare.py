@@ -32,7 +32,6 @@ sys.path.append(root_path)
 from utils.parser_helper import data_read_parser, res_map, mkdir
 from utils.io_helper import *
 import numpy as np
-import multiprocessing
 import time
 
 import logging
@@ -59,10 +58,6 @@ if __name__ == '__main__':
     resolution = args.high_res
     map_quality = args.map_quality
     postfix = [args.norm_file, 'RAWobserved']
-
-    pool_num = 23 if multiprocessing.cpu_count(
-    ) > 23 else multiprocessing.cpu_count() - 2
-
     raw_dir = os.path.join(root_dir, 'raw', cell_line)
 
     norm_files = []
@@ -84,20 +79,4 @@ if __name__ == '__main__':
     start = time.time()
     for data_fn, norm_fn in zip(data_files, norm_files):
         read_data(data_fn, norm_fn, out_dir, res_map[resolution])
-    '''
-    # I'm not sure why using multithreading on my computer will cause problems
-    # But, synchronized code does not spend too much time
-    # It will be ok
-    pool = multiprocessing.Pool(processes=pool_num)
-    logging.debug(f'Start a multiprocess pool with process_num={pool_num} for reading raw data')
-    for data_fn, norm_fn in zip(data_files, norm_files):
-        pool.apply_async(
-            read_data,
-            (data_fn,
-             norm_fn,
-             out_dir,
-             res_map[resolution]))
-    pool.close()
-    pool.join()
-    '''
     logging.debug(f'All reading processes done. Running cost is {(time.time()-start)/60:.1f} min.')

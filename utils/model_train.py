@@ -1,36 +1,39 @@
-# -*- coding: UTF-8 -*-
 """
 @Project: HiRDN
 @File: model_train.py
 @Author: nkul
 @Date: 2023/4/10 下午2:12
 """
-import math
 import os
 import random
 import time
 
 import numpy as np
+from math import log10
 from tqdm import tqdm
 import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from utils.evaluating import eval_lpips, eval_dists
-from utils.ssim import ssim
-from math import log10
+
 import lpips
 from DISTS_pytorch import DISTS
-from utils.util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
+
+from .util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
+from .evaluating import eval_lpips, eval_dists
+from .ssim import ssim
+
 import warnings
 warnings.filterwarnings("ignore")
+
 import logging
-from utils.config import set_log_config, root_dir
+from .config import set_log_config, root_dir
 set_log_config()
+
 from torch.utils.tensorboard import SummaryWriter
 
 
 def set_up(seed=3407):
-    # 3407 is all you need. 3407 is not a specials number.
+    # "3407 is all you need". 3407 is not a specials number.
     # The seed is set to ensure that our results can be reproduced.
     os.environ['PYTHONHASHSEED'] = str(seed)
     torch.manual_seed(seed)
@@ -40,9 +43,9 @@ def set_up(seed=3407):
     np.random.seed(seed)
     random.seed(seed)
 
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
-    torch.backends.cudnn.enabled = True
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = True
+    # torch.backends.cudnn.enabled = True
 
 
 def __adjust_learning_rate(epoch):
@@ -341,8 +344,8 @@ def model_train(_model_name, _train_file, _valid_file, _max_epochs, _batch_size,
     net_g, _padding, net_d = get_model(_model_name)
 
     # 2) get loader
-    train_loader = loader(_train_file, 'Train', _padding, True, _batch_size)
-    valid_loader = loader(_valid_file, 'Valid', _padding, False, _batch_size)
+    train_loader, _ = loader(_train_file, 'Train', _padding, True, _batch_size)
+    valid_loader, _ = loader(_valid_file, 'Valid', _padding, False, _batch_size)
 
     # 3) train
     if net_d is not None:

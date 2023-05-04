@@ -9,7 +9,6 @@ A tools to down sample data from high resolution data.
 """
 
 import numpy as np
-import multiprocessing
 import time
 import sys
 import os
@@ -40,10 +39,6 @@ if __name__ == '__main__':
     high_res = args.high_res
     low_res = args.low_res
     ratio = args.ratio
-
-    pool_num = 23 if multiprocessing.cpu_count(
-    ) > 23 else multiprocessing.cpu_count() - 2
-
     data_dir = os.path.join(root_dir, 'mat', cell_line)
     in_files = [os.path.join(data_dir, f)
                 for f in os.listdir(data_dir) if f.find(high_res) >= 0]
@@ -52,15 +47,4 @@ if __name__ == '__main__':
     start = time.time()
     for file in in_files:
         down_sample(file, low_res, ratio)
-    '''
-    # I'm not sure why using multithreading on my computer will cause problems
-    # But, synchronized code does not spend too much time [8 min]
-    # It will be ok
-    logging.debug(f'Start a multiprocess pool with process_num = {pool_num}')
-    pool = multiprocessing.Pool(pool_num)
-    for file in in_files:
-        pool.apply_async(down_sample, (file, low_res, ratio))
-    pool.close()
-    pool.join()
-    '''
     logging.debug(f'All down_sampling processes done. Running cost is {(time.time()-start)/60:.1f} min.')

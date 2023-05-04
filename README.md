@@ -269,9 +269,9 @@ To train:
 $$ {\color{red}!!!\ NOTE\ !!!} $$
 
 1. Do not use absolute paths
-2. Put your train/valid/test data in `$root/data/{your path/ your filename}`
+2. Put your train/valid/test data in `$root/data/{your path/your filename}`
 3. [if predict] Put your ckpt file in `$root/checkpoints/{your path/your filename}`
-4. Use relative paths `{your path/ your filename}`
+4. Use relative paths `{your path/your filename}`
 
 ```text
 usage: train.py -m MODEL -t TRAIN_FILE -v VALID_FILE [-e EPOCHS] [-b BATCH_SIZE] [-verbose VERBOSE] [--help]
@@ -331,8 +331,32 @@ Miscellaneous Arguments:
 ```
 
 ### Predict on matrix
-- [ ] todo
+1. `makedir $root/mat/{your cell_line}`
+2. Put your `chr{num}_{resolution}.npz` file in above dir
+3. run shell `python ./data/split_matrix.py -h` to generate data for predict
 
+```shell
+usage: split_matrix.py -c CELL_LINE -chunk CHUNK -stride STRIDE -bound BOUND [--help]
+
+A tools to generate data for predict.
+----------------------------------------------------------------------------------------------------------
+Use example : python ./data/split_matrix.py -chunk 64 -stride 64 -bound 201 -c GM12878
+----------------------------------------------------------------------------------------------------------
+
+optional arguments:
+  --help, -h      Print this help message and exit
+
+Required Arguments:
+  -c CELL_LINE    Required: Cell line for analysis[example:GM12878]
+
+Method Arguments:
+  -chunk CHUNK    Required: chunk size for dividing[example:64]
+  -stride STRIDE  Required: stride for dividing[example:64]
+  -bound BOUND    Required: distance boundary interested[example:201]
+
+```
+
+4. run shell `python predict.py -h` to predict [[same as predict-on-down_sample-data]]("#predict-on-down_sample-data")
 
 ## Visualization
 

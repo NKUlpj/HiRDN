@@ -6,8 +6,8 @@
 @Date: 2023/4/10 下午2:00
 """
 import sys
-from utils.parser_helper import *
-from model_train import model_train
+from utils.parser_helper import model_train_parser
+from utils.model_train import model_train
 
 
 if __name__ == '__main__':
