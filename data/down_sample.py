@@ -50,11 +50,18 @@ if __name__ == '__main__':
 
     logging.debug(f'Generating {low_res} files from {high_res} files by {ratio}x down_sampling.')
     start = time.time()
+    for file in in_files:
+        down_sample(file, low_res, ratio)
+    '''
+    # I'm not sure why using multithreading on my computer can cause problems
+    # But, synchronized code does not spend too much time [8 min]
+    # It will be ok
     logging.debug(f'Start a multiprocess pool with process_num = {pool_num}')
     pool = multiprocessing.Pool(pool_num)
     for file in in_files:
         pool.apply_async(down_sample, (file, low_res, ratio))
     pool.close()
     pool.join()
+    '''
     logging.debug(f'All down_sampling processes done. Running cost is {(time.time()-start)/60:.1f} min.')
 

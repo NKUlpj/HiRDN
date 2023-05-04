@@ -82,6 +82,12 @@ if __name__ == '__main__':
     logging.debug(f'Output directory: {out_dir}')
 
     start = time.time()
+    for data_fn, norm_fn in zip(data_files, norm_files):
+        read_data(data_fn, norm_fn, out_dir, res_map[resolution])
+    '''
+    # I'm not sure why using multithreading on my computer can cause problems
+    # But, synchronized code does not spend too much time
+    # It will be ok
     pool = multiprocessing.Pool(processes=pool_num)
     logging.debug(f'Start a multiprocess pool with process_num={pool_num} for reading raw data')
     for data_fn, norm_fn in zip(data_files, norm_files):
@@ -93,5 +99,6 @@ if __name__ == '__main__':
              res_map[resolution]))
     pool.close()
     pool.join()
+    '''
     logging.debug(f'All reading processes done. Running cost is {(time.time()-start)/60:.1f} min.')
 

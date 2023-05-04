@@ -5,11 +5,12 @@
 @Author: nkul
 @Date: 2023/4/10 下午12:30
 """
+import logging
 import os
 import argparse
 import textwrap
 import logging
-from config import set_log_config
+from .config import set_log_config
 set_log_config()
 
 # the Root directory for all raw and processed data

@@ -54,10 +54,11 @@ def __adjust_learning_rate(epoch):
 def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     # step 1: initial
     set_up()
+    _log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     out_dir = os.path.join(root_dir, 'checkpoints')
     os.makedirs(out_dir, exist_ok=True)
-    best_ckpt = os.path.join(out_dir, f'best_{model_name}.pytorch')
-    final_ckpt = os.path.join(out_dir, f'final_{model_name}.pytorch')
+    best_ckpt = os.path.join(out_dir, f'best_{model_name}_{_log_time}.pytorch')
+    final_ckpt = os.path.join(out_dir, f'final_{model_name}_{_log_time}.pytorch')
     logging.debug(f'BEST_CKPT file is stored at {best_ckpt}')
     logging.debug(f'FINAL_CKPT file is stored at {final_ckpt}')
     start = time.time()
@@ -81,11 +82,9 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     _scheduler = CosineAnnealingLR(_optimizer, max_epochs)
 
     # step 4: start train
-    _log_time = None
     _train_writer = None
     _val_writer = None
     if verbose:
-        _log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
         _train_writer = SummaryWriter(root_dir + f'/logs/{model_name}/train_{_log_time}')
         _val_writer = SummaryWriter(root_dir + f'/logs/{model_name}/val_{_log_time}')
     for epoch in range(1, max_epochs + 1):
@@ -185,10 +184,13 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
 def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epochs, verbose):
     # step 1: initial
     set_up()
+    _log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     out_dir = os.path.join(root_dir, 'checkpoints')
     os.makedirs(out_dir, exist_ok=True)
-    best_ckpt = os.path.join(out_dir, f'best_{model_name}.pytorch')
-    final_ckpt = os.path.join(out_dir, f'final_{model_name}.pytorch')
+    best_ckpt = os.path.join(out_dir, f'best_{model_name}_{_log_time}.pytorch')
+    final_ckpt = os.path.join(out_dir, f'final_{model_name}_{_log_time}.pytorch')
+    logging.debug(f'BEST_CKPT file is stored at {best_ckpt}')
+    logging.debug(f'FINAL_CKPT file is stored at {final_ckpt}')
     start = time.time()
     device = get_device()  # whether using GPU for training
     best_ssim = 0
@@ -215,11 +217,9 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
     dists_fn.to(device)
 
     # step 4: start train
-    _log_time = None
     _train_writer = None
     _val_writer = None
     if verbose:
-        _log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
         _train_writer = SummaryWriter(root_dir + f'/logs/{model_name}/train_{_log_time}')
         _val_writer = SummaryWriter(root_dir + f'/logs/{model_name}/val_{_log_time}')
     for epoch in range(1, max_epochs + 1):

@@ -71,6 +71,10 @@ if __name__ == '__main__':
     mkdir(out_dir)
 
     start = time.time()
+    '''
+    # I'm not sure why using multithreading on my computer can cause problems
+    # But, synchronized code does not spend too much time[1 min]
+    # It will be ok
     pool = multiprocessing.Pool(processes=pool_num)
     logging.debug(f'Start a multiprocess pool with processes = {pool_num} for generating data')
     results = []
@@ -83,13 +87,22 @@ if __name__ == '__main__':
         results.append(res)
     pool.close()
     pool.join()
-    logging.debug(f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')
-    data = np.concatenate([r.get()[1] for r in results])
-    target = np.concatenate([r.get()[2] for r in results])
-    inds = np.concatenate([r.get()[3] for r in results])
-    sizes = {r.get()[0]: r.get()[4] for r in results}
+    '''
+    results = []
+    for n in chr_list:
+        high_file = os.path.join(data_dir, f'chr{n}_{high_res}.npz')
+        down_file = os.path.join(data_dir, f'chr{n}_{low_res}.npz')
+        # kwargs = {'_chunk': chunk, '_stride': stride, '_bound': bound}
+        res = data_divider(n, high_file, down_file, chunk, stride, bound)
+        results.append(res)
 
-    filename = f'c{chunk}_s{stride}_{postfix}.npz'
+    logging.debug(f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')
+    data = np.concatenate([r[1] for r in results])
+    target = np.concatenate([r[2] for r in results])
+    inds = np.concatenate([r[3] for r in results])
+    sizes = {r[0]: r[4] for r in results}
+
+    filename = f'{cell_line}_c{chunk}_s{stride}_b{bound}_{postfix}.npz'
     split_file = os.path.join(out_dir, filename)
     np.savez_compressed(
         split_file,

@@ -6,8 +6,8 @@
 @Date: 2023/4/10 下午1:56
 """
 
-from Common import *
-from Component import HiDB, UBlock
+from models.Common import *
+from models.Component import HiDB, UBlock
 import logging
 import torch
 import torch.nn as nn

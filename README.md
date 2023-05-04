@@ -13,11 +13,15 @@ You can view the data on NCBI via accession [GSE62525](https://www.ncbi.nlm.nih.
 * [K562](https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE63525&format=file&file=GSE63525%5FK562%5Fintrachromosomal%5Fcontact%5Fmatrices%2Etar%2Egz) intrachromasomal
 * [CH12-LX](https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE63525&format=file&file=GSE63525%5FCH12%2DLX%5Fintrachromosomal%5Fcontact%5Fmatrices%2Etar%2Egz) (mouse) intrachromosomal
 
-> Please follow the steps below carefully.
 
-### 0.set work directory
+<span style="color: red; "> ！！！ FOLLOW THE STEPS CAREFULLY！！！</span>
 
-i. Create your root directory and write in `/utils/parser_helper.py`;For example, we set `root_dir = './Datasets_NPZ'`
+
+### 0. Set work directory
+
+i. Create your root directory and write in `/utils/parser_helper.py`;
+
+For example, we set `root_dir = './Datasets_NPZ'`
 
 ```python
 # the Root directory for all raw and processed data
@@ -30,7 +34,7 @@ ii. Make a new directory named `raw` to store raw data.
 makedir $root_dir/raw
 ```
 
-iii. Download and Unzip your data into the `$root_dir/raw` directory. 
+iii. Download and Unzip data into the `$root_dir/raw` directory. 
 
 ---
 After doing that,your dir should be like this
@@ -47,6 +51,7 @@ Datasets_NPZ
 │   └── CH12-LX
 ```
 </details>
+
 <b>Follow the following steps to generate datasets in .npz format:</b>
 
 ### 1. Read the raw data
@@ -146,7 +151,7 @@ Datasets_NPZ
 </details>
 
 ### 3. Generate train, validation and test datasets
-* you can set your desired chromosomes for each set in `utils/parser_helper.py` within the set_dict dictionary.
+* you can set your desired chromosomes for each set in `utils/parser_helper.py` within the `set_dict` dictionary.
 * This specific example will create a file in `$root_dir/data` named xxx_train.npz.
 
 ```python
@@ -183,7 +188,12 @@ Method Arguments:
   -bound BOUND          Required: distance boundary interested[example:201]
 
 ```
-<b>Note</b>: For training, you must have both training and validation files present in `$root_dir/data`. Change the option -s to generate the validation and other datasets needed
+
+<span style="color: red; "> 
+Note: For training, you must have both training and validation files present in
+$root_dir/data. 
+Change the option -s to generate the validation and other datasets needed 
+</span>
 
 ---
 After doing that,your dir should be like this
@@ -234,6 +244,7 @@ mat = np.array([[3, 2, 0, 7, 0, 0, 5, 2],
 
 # output_filename should be like `chr1_10kb.npz`
 output_filename = 'chr1_10kb.npz'
+# key must be `hic`
 np.savez_compressed(output_filename, hic=mat)
 ```
 
@@ -257,6 +268,13 @@ To train:
 
 **GPU acceleration is strongly recommended.**
 ### All models
+<span style="color: red; "> ！！！ NOTE ！！！</span>
+
+1. Do not use absolute paths
+2. Put your train/valid/test data in `$root/data/{your path/ your filename}`
+3. [if predict] Put your ckpt file in `$root/checkpoints/{your path/your filename}`
+4. Use relative paths `{your path/ your filename}`
+
 ```text
 usage: train.py -m MODEL -t TRAIN_FILE -v VALID_FILE [-e EPOCHS] [-b BATCH_SIZE] [-verbose VERBOSE] [--help]
 

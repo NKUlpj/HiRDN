@@ -6,7 +6,7 @@
 @Date: 2023/4/10 下午1:50
 """
 from collections import OrderedDict
-from Attention import *
+from models.Attention import *
 
 
 # private func

@@ -44,6 +44,8 @@ def __model_predict(model, _loader, ckpt_file):
     dists_fn = DISTS()
     dists_fn.to(device)
     net = model.to(device)
+    log_info = f"Model parameter number - {sum(p.numel() for p in net.parameters() if p.requires_grad)}"
+    logging.debug(log_info)
     net.load_state_dict(
         torch.load(ckpt_file, map_location=torch.device('cpu'))
     )
