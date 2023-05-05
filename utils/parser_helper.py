@@ -9,7 +9,7 @@ import os
 import argparse
 import textwrap
 import logging
-from .config import set_log_config
+from config import set_log_config
 set_log_config()
 
 res_map = {
@@ -336,7 +336,7 @@ def model_visual_parser():
         description=textwrap.dedent('''\
             Visualization
             --------------------------------------------------------------------------------------------------
-            Use example : python visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -n 'chr4:14400-14800'
+            Use example : python ./utils/visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -c 'Reds'
             --------------------------------------------------------------------------------------------------
         '''
                                     ),
@@ -372,6 +372,14 @@ def model_visual_parser():
         required=False,
         default=95,
         type=int
+    )
+    misc_args.add_argument(
+        '-c',
+        dest='cmap',
+        help='Optional: color map[example: Reds]',
+        required=False,
+        type=str,
+        default='Reds'
     )
     misc_args.add_argument(
         '-n',

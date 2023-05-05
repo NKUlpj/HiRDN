@@ -369,12 +369,12 @@ Method Arguments:
 
 ## Visualization
 
-```shell
-usage: visualization.py -f FILE -s START -e END [-p PERCENTILE] [-n NAME] [--help]
+```text
+usage: visualization.py -f FILE -s START -e END [-p PERCENTILE] [-c CMAP] [-n NAME] [--help]
 
 Visualization
 --------------------------------------------------------------------------------------------------
-Use example : python visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -n 'chr4:14400-14800'
+Use example : python ./utils/visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -c 'Reds'
 --------------------------------------------------------------------------------------------------
 
 optional arguments:
@@ -385,9 +385,18 @@ Miscellaneous Arguments:
   -s START       Required: start bin[example: 14400]
   -e END         Required: end bin[example: 14800]
   -p PERCENTILE  Optional: percentile of max, the default is 95.
+  -c CMAP        Optional: color map[example: Reds]
   -n NAME        Optional: the name of pic[example: chr4:14400-14800]
 
 ```
+
+cmap:  [👉 see matplotlib doc](https://matplotlib.org/stable/tutorials/colors/colormaps.html)
+
+Recommended:
+
+1. 'Reds'
+2. 'YlGn'
+3. 'Greys'
 
 
 ## Appendix
