@@ -10,17 +10,31 @@
 
 
 ## Navigation
-
-1.  [Data Preprocessing](#data-preprocessing)
+1. [Installation](#installation)
+   - [Require](#requires)
+   - [Install](#clone-or-download)
+2. [Data Preprocessing](#data-preprocessing)
    - [Set work directory](#set-work-directory)
    - [Read the raw data](#read-the-raw-data)
    - [Down_sample the data](#downsample-the-data)
    - [Generate train, validation and test datasets](#generate-train-validation-and-test-datasets)
    - [Use own data for training](#prepare-npz-data)
 
-2. [Train](#training)
-3. [Predict](#predict)
-4. [Visualization](#visualization)
+3. [Train](#training)
+4. [Predict](#predict)
+5. [Visualization](#visualization)
+
+
+## Installation
+
+### Requires
+* todo
+* todo
+* todo
+* ...
+
+### Clone or Download
+todo
 
 ## Data Preprocessing
 
