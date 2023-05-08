@@ -22,7 +22,7 @@ from utils.config import set_log_config, root_dir
 set_log_config()
 
 
-def down_sample(in_file, _low_res, _ratio):
+def __down_sample(in_file, _low_res, _ratio):
     data = np.load(in_file, allow_pickle=True)
     hic = data['hic']
     down_hic = down_sampling(hic, _ratio)
@@ -46,5 +46,5 @@ if __name__ == '__main__':
     logging.debug(f'Generating {low_res} files from {high_res} files by {ratio}x down_sampling.')
     start = time.time()
     for file in in_files:
-        down_sample(file, low_res, ratio)
+        __down_sample(file, low_res, ratio)
     logging.debug(f'All down_sampling processes done. Running cost is {(time.time()-start)/60:.1f} min.')

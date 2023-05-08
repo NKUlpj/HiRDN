@@ -9,7 +9,7 @@ import os
 import argparse
 import textwrap
 import logging
-from config import set_log_config
+from .config import set_log_config
 set_log_config()
 
 res_map = {
@@ -191,7 +191,7 @@ def data_divider_parser():
         dest='dataset',
         help='Required: Dataset for train/valid/predict',
         default='train',
-        choices=['K562_test', 'mESC_test', 'train', 'valid', 'GM12878_test'],
+        # choices=['K562_test', 'mESC_test', 'train', 'valid', 'GM12878_test'],
     )
 
     method_args = parser.add_argument_group('Method Arguments')
@@ -336,7 +336,7 @@ def model_visual_parser():
         description=textwrap.dedent('''\
             Visualization
             --------------------------------------------------------------------------------------------------
-            Use example : python ./utils/visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -c 'Reds'
+            Use example : python ./visual.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -c 'Reds'
             --------------------------------------------------------------------------------------------------
         '''
                                     ),

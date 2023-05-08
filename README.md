@@ -374,7 +374,7 @@ usage: visualization.py -f FILE -s START -e END [-p PERCENTILE] [-c CMAP] [-n NA
 
 Visualization
 --------------------------------------------------------------------------------------------------
-Use example : python ./utils/visualization.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -c 'Reds'
+Use example : python ./visual.py -f hic_matrix.npz -s 14400 -e 14800 -p 95 -c 'Reds'
 --------------------------------------------------------------------------------------------------
 
 optional arguments:
@@ -390,13 +390,15 @@ Miscellaneous Arguments:
 
 ```
 
+> Figure will be saved to $root_dir/img
+
 cmap:  [👉 see matplotlib doc](https://matplotlib.org/stable/tutorials/colors/colormaps.html)
 
 Recommended:
 
-1. 'Reds'
-2. 'YlGn'
-3. 'Greys'
+1. Reds
+2. YlGn
+3. Greys
 
 
 ## Appendix

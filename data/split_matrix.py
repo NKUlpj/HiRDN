@@ -20,7 +20,7 @@ from utils.config import set_log_config, root_dir
 set_log_config()
 
 
-def data_divider(
+def __data_divider(
         _n,
         d_file,
         _chunk=32,
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     matrix_files = os.listdir(data_dir)
     for file in matrix_files:
         down_file = os.path.join(data_dir, file)
-        res = data_divider(__get_chr_num(file), down_file, chunk, stride, bound)
+        res = __data_divider(__get_chr_num(file), down_file, chunk, stride, bound)
         results.append(res)
 
     logging.debug(f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')

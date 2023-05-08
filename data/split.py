@@ -20,7 +20,7 @@ from utils.config import set_log_config, root_dir, set_dict
 set_log_config()
 
 
-def data_divider(
+def __data_divider(
         _n,
         h_file,
         d_file,
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     for n in chr_list:
         high_file = os.path.join(data_dir, f'chr{n}_{high_res}.npz')
         down_file = os.path.join(data_dir, f'chr{n}_{low_res}.npz')
-        res = data_divider(n, high_file, down_file, chunk, stride, bound)
+        res = __data_divider(n, high_file, down_file, chunk, stride, bound)
         results.append(res)
 
     logging.debug(f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')

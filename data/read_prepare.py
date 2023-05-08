@@ -39,7 +39,7 @@ from utils.config import set_log_config, root_dir
 set_log_config()
 
 
-def read_data(data_file, norm_file, _out_dir, _resolution):
+def __read_data(data_file, norm_file, _out_dir, _resolution):
     filename = os.path.basename(data_file).split('.')[0] + '.npz'
     out_file = os.path.join(_out_dir, filename)
     try:
@@ -78,5 +78,5 @@ if __name__ == '__main__':
 
     start = time.time()
     for data_fn, norm_fn in zip(data_files, norm_files):
-        read_data(data_fn, norm_fn, out_dir, res_map[resolution])
+        __read_data(data_fn, norm_fn, out_dir, res_map[resolution])
     logging.debug(f'All reading processes done. Running cost is {(time.time()-start)/60:.1f} min.')

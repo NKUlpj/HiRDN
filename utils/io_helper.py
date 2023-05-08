@@ -39,7 +39,7 @@ def read_coo2mat(coo_file, norm_file, resolution):
     return _hic.astype(float)
 
 
-def dense2tag(matrix):
+def __dense2tag(matrix):
     """
     Converts a square matrix (dense) to coo-based tag matrix.
     """
@@ -56,7 +56,7 @@ def dense2tag(matrix):
     return tag_mat, tag_len
 
 
-def tag2dense(tag, n_size):
+def __tag2dense(tag, n_size):
     """
     Coverts a coo-based tag matrix to dense square matrix.
     """
@@ -75,12 +75,12 @@ def down_sampling(matrix, down_ratio, verbose=False):
     """
     if verbose:
         logging.debug(f"[Down sampling] Matrix shape is {matrix.shape}")
-    tag_mat, tag_len = dense2tag(matrix)
+    tag_mat, tag_len = __dense2tag(matrix)
     sample_idx = np.random.choice(tag_len, tag_len // down_ratio)
     sample_tag = tag_mat[sample_idx]
     if verbose:
         logging.debug(f'[Down sampling] Sampling 1/{down_ratio} of {tag_len} reads')
-    down_mat = tag2dense(sample_tag, matrix.shape[0])
+    down_mat = __tag2dense(sample_tag, matrix.shape[0])
     return down_mat
 
 
@@ -151,97 +151,3 @@ def together(mat_list, indices, corp=0, species='hsa', tag='HiC'):
             full_mat[i:i + h, j:j + w] = sub
         results[n] = full_mat
     return results
-
-
-def pooling(mat, scale, pool_type='max', return_array=False, verbose=True):
-    mat = torch.tensor(mat).float()
-    out = None
-    if len(mat.shape) == 2:
-        mat.unsqueeze_(0)  # need to add channel dimension
-    if pool_type == 'avg':
-        out = F.avg_pool2d(mat, scale)
-    elif pool_type == 'max':
-        out = F.max_pool2d(mat, scale)
-    if return_array:
-        out = out.squeeze().numpy()
-    if verbose:
-        logging.debug('({}, {}) sized matrix is {} pooled to ({}, {}) size, with {}x{} down scale.'.format(
-            *mat.shape[-2:], pool_type, *out.shape[-2:], scale, scale))
-    return out
-
-
-def dense2sparse(mat, low_range, up_range):
-    """
-    Convert npz file to sparse in format: chr1 bin1 chr2 bin2 value.
-    for predicted images or 'hic' for real/down sampled images. Chromosome is an integer representing the chromosome of
-    the matrix being converted.
-
-    :arg: Matrix = (nxn), Key = ('hic'), Chromosome = integer
-
-    :returns: List of values for each bin for one chromosome in the form [chromosome, bin1, chromosome, bin2, value]
-
-    """
-
-    x = np.load(mat)
-    y = np.array(x['hic'])
-    z = y[low_range:up_range, low_range:up_range]
-
-    height, width = z.shape
-    assert height == width, ' Assumed the matrix is square.'
-
-    final_list = list()
-    for i in range(0, height):
-        for j in range(0, width):
-            value = z[i, j]
-            array = [(i + low_range), (j + low_range), value]
-            final_list.append(array)
-    final_list = np.array(final_list)
-    return final_list
-
-
-def reference_regions(mat, chromosome, resolution):
-    """
-    :arg: Matrix = (nxn), Chromosome = integer, Resolution = integer
-    :returns: List of reference regions in [chromosome, bin start (base pairs), bin end (base pairs), bin number]
-    """
-    x = np.load(mat)
-    y = np.array(x['hic'])
-    num_bins = y.shape[0]
-
-    count = 0
-    final_dict = dict()
-    for i in range(0, num_bins + 1):
-        if i == 0:
-            start = count
-            count += resolution
-            end = count
-
-            array = [chromosome, start, end]
-            final_dict[i] = array
-
-        elif 0 < i < num_bins:
-            start = count
-            count += resolution
-            end = count
-
-            array = [chromosome, start, end]
-            final_dict[i] = array
-
-        elif i == num_bins:
-            start = count
-            count += resolution
-            end = count
-
-            array = [chromosome, start, end]
-            final_dict[i] = array
-
-    return final_dict
-
-
-def get_region(region_dict, up_range, low_range):
-    final_list = list()
-    for value in region_dict.values():
-        if low_range <= int(value[2]) <= up_range:
-            final_list.append(value)
-
-    return final_list

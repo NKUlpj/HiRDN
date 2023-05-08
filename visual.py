@@ -1,22 +1,23 @@
 # -*- coding: UTF-8 -*-
 """
-@Project: HiRDN
-@File: visualization.py
+@Project: HiRDN 
+@File: visual.py
 @Author: nkul
-@Date: 2023/4/10 下午4:19
+@Date: 2023/5/8 下午2:20 
+@GitHub: https://github.com/nkulpj
 """
 import logging
 import sys
 import os
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(root_path)
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from parser_helper import model_visual_parser
-# from config import set_log_config
-# set_log_config()
+from utils.parser_helper import model_visual_parser
+from utils.config import root_dir
+
+
+__img_dir = os.path.join(root_dir, 'img')
 
 
 def __plot_hic(matrix, start, end, percentile, name, cmap, color_bar=False):
@@ -29,10 +30,13 @@ def __plot_hic(matrix, start, end, percentile, name, cmap, color_bar=False):
     ax.set_title(name)
     ax.set_xticks([])
     ax.set_yticks([])
+    fig.tight_layout()
     if color_bar:
         fig.colorbar(im, ax=ax)
-    plt.savefig(name + '.png')
-    logging.info(f'Save pic to {name}.png')
+
+    __save_file = os.path.join(__img_dir, f'{name}.png')
+    plt.savefig(__save_file)
+    logging.info(f'Save pic to {__save_file}')
     plt.show()
 
 

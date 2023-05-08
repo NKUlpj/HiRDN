@@ -93,7 +93,7 @@ class HiDB(nn.Module):
 
         self.c = conv_layer(hidden_channels * 2, channels, 1)
         if mode != 'T':
-            self.attn = get_attn_by_name('HiConvMod', channels)
+            self.attn = get_attn_by_name('HiCBAM', channels)
 
         self.hifm = HiFM(channels, mode=mode)
 
