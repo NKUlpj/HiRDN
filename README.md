@@ -2,6 +2,25 @@
 
 ![](./img/HiRDN.png)
 
+## Unique features of HiRDN
+
+* todo
+* todo
+* todo
+
+
+## Navigation
+
+1.  [Data Preprocessing](#data-preprocessing)
+   - [Set work directory](#set-work-directory)
+   - [Read the raw data](#read-the-raw-data)
+   - [Down_sample the data](#downsample-the-data)
+   - [Generate train, validation and test datasets](#generate-train-validation-and-test-datasets)
+   - [Use own data for training](#prepare-npz-data)
+
+2. [Train](#training)
+3. [Predict](#predict)
+4. [Visualization](#visualization)
 
 ## Data Preprocessing
 
@@ -17,7 +36,7 @@ You can view the data on NCBI via accession [GSE62525](https://www.ncbi.nlm.nih.
 $$ {\color{blue}!!!\ FOLLOW\ THE\ STEPS\ CAREFULLY\ !!!} $$
 
 
-### 0. Set work directory
+### Set work directory
 
 i. Create your root directory and write in `/utils/config.py`;
 
@@ -54,7 +73,7 @@ Datasets_NPZ
 
 <b>Follow the following steps to generate datasets in .npz format:</b>
 
-### 1. Read the raw data
+### Read the raw data
 > This will create a new directory `$root_dir/mat/<cell_line_name>` where all chrN_[HR].npz files will be stored.
 
 ```text
@@ -103,7 +122,7 @@ Datasets_NPZ
 </details>
 
 
-### 2.Down_sample the data
+### Down_sample the data
 
 > This adds down_sampled HR data to `$root_dir/mat/<cell_line_name>` as chrN_[LR].npz.
 
@@ -150,7 +169,7 @@ Datasets_NPZ
 ```
 </details>
 
-### 3. Generate train, validation and test datasets
+### Generate train, validation and test datasets
 * you can set your desired chromosomes for each set in `utils/config.py` within the `set_dict` dictionary.
 * This specific example will create a file in `$root_dir/data` named xxx_train.npz.
 
