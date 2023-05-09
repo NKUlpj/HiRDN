@@ -16,40 +16,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-class LossT(nn.Module):
-    """
-    Loss_T = [r1 * vgg(1) + r2 * vgg(15) + r3 * vgg(25)] + alpha * dists_loss + beta * l1_loss
-    """
-    def __init__(self, device):
-        super().__init__()
-        vgg = vgg16(pretrained=True)
-        # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
-        self.device = device
-        # perception_loss[0:3], dists_loss, l1_image_loss
-        self.loss_weights = [0.01, 0.0001, 0.0003, 0.01, 1]
-        loss_networks = []
-        for layer in [1, 15, 25]:
-            loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
-            for param in loss_network.parameters():
-                param.requires_grad = False
-            loss_networks.append(loss_network)
-        self.loss_networks = loss_networks
-        self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
-        self.l1_loss = nn.L1Loss()
-        self.dists_loss = DISTS()
-
-    def forward(self, out_images, target_images):
-        perception_loss = 0
-        for idx, _loss_network in enumerate(self.loss_networks):
-            _loss_network.to(self.device)
-            _out_feat = _loss_network(out_images.repeat([1, 3, 1, 1]))
-            _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
-            perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
-        image_loss = self.l1_loss(out_images, target_images)
-        dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
-        return self.loss_weights[-2] * dists_loss + self.loss_weights[-1] * image_loss + perception_loss
-
-
 class LossL(nn.Module):
     """
     Loss_L = [r1 * vgg(3) + r2 * vgg(8) + r3 * vgg(15)] + alpha * dists_loss + beta * MS_SSIM_L1_LOSS
@@ -60,7 +26,7 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        self.loss_weights = [0.1, 0.008, 0.008, 1]
+        self.loss_weights = [0.08, 0.04, 0.01, 1]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
@@ -86,10 +52,9 @@ class LossL(nn.Module):
 
 class MS_SSIM_L1_LOSS(nn.Module):
     """
-    Code from https://github.com/psyrocloud/MS-SSIM_L1_LOSS
-    see paper "Loss Functions for Image Restoration With Neural Networks"
+    Some Code from https://github.com/psyrocloud/MS-SSIM_L1_LOSS
+    Paper "Loss Functions for Image Restoration With Neural Networks"
     """
-    # TODO alpha
     def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.84, compensation=1, channel=1):
         super(MS_SSIM_L1_LOSS, self).__init__()
         gaussian_sigmas = [0.5, 1.0, 2.0, 4.0, 8.0]

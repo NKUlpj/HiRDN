@@ -11,7 +11,7 @@
 
 ## Navigation
 1. [Installation](#installation)
-   - [Require](#requires)
+   - [Requires](#requires)
    - [Install](#clone-or-download)
 2. [Data Preprocessing](#data-preprocessing)
    - [Set work directory](#set-work-directory)
@@ -19,7 +19,6 @@
    - [Down_sample the data](#downsample-the-data)
    - [Generate train, validation and test datasets](#generate-train-validation-and-test-datasets)
    - [Use own data for training](#prepare-npz-data)
-
 3. [Train](#training)
 4. [Predict](#predict)
 5. [Visualization](#visualization)
@@ -27,14 +26,21 @@
 
 ## Installation
 
-### Requires
-* todo
-* todo
-* todo
-* ...
-
 ### Clone or Download
-todo
+Clone or Download our repo.
+
+### Requires
+see `requirements.txt`
+
+---
+**We recommend using conda to create a virtual environment.**
+
+1. Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) firstly.
+2. Enter the repo.
+3. shell `conda create --name <your_name> --file requirements.txt`
+4. shell `conda activate <your_name>`
+
+---
 
 ## Data Preprocessing
 
