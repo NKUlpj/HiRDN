@@ -438,6 +438,7 @@ Recommended:
 1. Reds
 2. YlGn
 3. Greys
+4. YlOrRd
 
 
 ## Appendix
@@ -456,7 +457,10 @@ a['key_name']
 import numpy as np
 hic_matrix = np.load("path/to/file.npz", allow_pickle=True)['hic']
 ```
-## Thanks
+## Acknowledgement
 
+We thank for some wonderful repo, including
 1. [DeepHiC](https://github.com/omegahh/DeepHiC) : some code for data processing.
     * utils/io_helper.py
+2. [RFDN](https://github.com/njulj/RFDN): some code for backbone of HiRDN
+   * models/common.py

@@ -7,8 +7,17 @@
 """
 import logging
 
+
+'''
+log_level
+1. logging.DEBUG
+2. logging.INFO
+3. logging.WARNING
+4. logging.ERROR
+
+'''
 __log_level = logging.DEBUG
-__log_format = '%(asctime)s - [%(levelname)s] %(message)s'
+__log_format = '%(asctime)s [%(levelname)s] - [%(filename)s: %(lineno)d] %(message)s'
 
 # the Root directory for all raw and processed data
 root_dir = 'Datasets_NPZ'  # Example of root directory name

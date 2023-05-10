@@ -32,7 +32,7 @@ set_log_config()
 from torch.utils.tensorboard import SummaryWriter
 
 
-def set_up(seed=3407):
+def __set_up(seed=3407):
     # "3407 is all you need". 3407 is not a specials number.
     # The seed is set to ensure that our results can be reproduced.
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -43,9 +43,8 @@ def set_up(seed=3407):
     np.random.seed(seed)
     random.seed(seed)
 
-    # torch.backends.cudnn.deterministic = True
-    # torch.backends.cudnn.benchmark = True
-    # torch.backends.cudnn.enabled = True
+    # using a deterministic cuda
+    torch.backends.cudnn.deterministic = True
 
 
 def __adjust_learning_rate(epoch):
@@ -55,7 +54,7 @@ def __adjust_learning_rate(epoch):
 
 def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     # step 1: initial
-    set_up()
+    __set_up()
     _log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     out_dir = os.path.join(root_dir, 'checkpoints')
     os.makedirs(out_dir, exist_ok=True)
@@ -185,7 +184,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
 
 def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epochs, verbose):
     # step 1: initial
-    set_up()
+    __set_up()
     _log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     out_dir = os.path.join(root_dir, 'checkpoints')
     os.makedirs(out_dir, exist_ok=True)

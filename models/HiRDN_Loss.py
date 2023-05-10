@@ -26,7 +26,7 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        self.loss_weights = [0.08, 0.04, 0.01, 1]
+        self.loss_weights = [0.04, 0.04, 0.01, 1]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
@@ -36,7 +36,8 @@ class LossL(nn.Module):
         self.loss_networks = loss_networks
         self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
         self.l1_loss = nn.L1Loss()
-        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.5)
+        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.1)
+        self.dists_loss = DISTS()
 
     def forward(self, out_images, target_images):
         perception_loss = 0
@@ -46,8 +47,9 @@ class LossL(nn.Module):
             _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
             perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         ms_ssim_l1_loss = self.ms_ssim_l1_loss(out_images, target_images)
-        return self.loss_weights[-1] * ms_ssim_l1_loss + perception_loss
-# python train.py -m HiRDN_L -t GM12878_c40_s40_b301_train.npz -v GM12878_c40_s40_b301_valid.npz -e 50 -b 64
+        dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
+        return self.loss_weights[-1] * ms_ssim_l1_loss + perception_loss + 0.005 * dists_loss
+
 
 
 class MS_SSIM_L1_LOSS(nn.Module):
