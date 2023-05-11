@@ -17,7 +17,7 @@ log_level
 
 '''
 __log_level = logging.DEBUG
-__log_format = '%(asctime)s [%(levelname)s] - [%(filename)s: %(lineno)d] %(message)s'
+__log_format = '%(asctime)s [%(levelname)s] - %(message)s'
 
 # the Root directory for all raw and processed data
 root_dir = 'Datasets_NPZ'  # Example of root directory name
