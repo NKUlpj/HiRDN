@@ -3,7 +3,7 @@
 ![](./img/HiRDN.png)
 
 ## Unique features of HiRDN
-
+![](./img/Compare.png)
 * todo
 * todo
 * todo
