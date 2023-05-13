@@ -54,8 +54,6 @@ def eval_lpips(x, y, loss_fn):
     # x = __array_norm_1(x)
     # y = __array_norm_1(y)
     _lpips = loss_fn(x, y).sum().item()
-    if _lpips < 0:
-        _lpips = 0
     return _lpips
 
 
@@ -66,6 +64,4 @@ def eval_dists(x, y, dists_fn):
     # x = __array_norm_0(x)
     # y = __array_norm_0(y)
     _dists = dists_fn(x, y).sum().item()
-    if _dists < 0:
-        _dists = 0
     return _dists

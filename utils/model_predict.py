@@ -96,9 +96,7 @@ def __model_predict(model, _loader, ckpt_file):
             lr = lr.to(device)
             hr = hr.to(device)
             sr = net(lr)
-
-            batch_ssim = eval_ssim(sr, hr)
-            val_res['ssims'] += batch_ssim * batch_size
+            val_res['ssims'] += eval_ssim(sr, hr) * batch_size
             val_res['psnrs'] += eval_psnr(sr, hr) * batch_size
             val_res['dists'] += eval_dists(sr, hr, dists_fn)
             _avg_dists = val_res['dists'] / val_res['samples']

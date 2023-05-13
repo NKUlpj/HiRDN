@@ -19,7 +19,7 @@ import lpips
 from DISTS_pytorch import DISTS
 
 from .util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
-from .evaluating import eval_lpips, eval_dists
+from .evaluating import eval_lpips, eval_dists, eval_ssim, eval_psnr
 from .ssim import ssim
 
 import warnings
@@ -74,8 +74,6 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     # step 3: load loss
     criterion = get_loss_fn(model_name, device)
     criterion.to(device)
-    lpips_fn = lpips.LPIPS(net='vgg', verbose=False)
-    lpips_fn.to(device)
     dists_fn = DISTS()
     dists_fn.to(device)
 
@@ -123,7 +121,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
 
         # step 4.2 staring valid
         # val_res 记录所有batch的总和
-        val_res = {'g_loss': 0, 'mse': 0, 'ssim': 0, 'ssims': 0, 'psnr': 0, 'samples': 0, "lpips": 0, 'dists': 0}
+        val_res = {'g_loss': 0,  'ssims': 0, 'psnrs': 0, 'samples': 0, 'dists': 0}
         net.eval()
         valid_bar = tqdm(valid_loader, colour='#fda085')
         with torch.no_grad():
@@ -135,33 +133,24 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
                 sr = net(lr)
                 g_loss = criterion(sr, hr)
                 # loss
-                val_res['g_loss'] += g_loss.item() * batch_size
-                # mae & mse
-                _this_batch_mse = ((sr - hr) ** 2).mean()
-                _this_batch_mae = abs(sr - hr).mean()
-                val_res['mse'] += _this_batch_mse * batch_size
-                batch_ssim = ssim(sr, hr)
-                val_res['ssims'] += batch_ssim * batch_size
-                val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
-                val_res['ssim'] = val_res['ssims'] / val_res['samples']
-                # lpips
-                val_res['lpips'] += eval_lpips(sr, hr, lpips_fn)
-                # dists
+                val_res['g_loss'] += batch_size * g_loss.item()
+                val_res['ssims'] += batch_size * eval_ssim(sr, hr)
+                val_res['psnrs'] += batch_size * eval_psnr(sr, hr)
                 val_res['dists'] += eval_dists(sr, hr, dists_fn)
-                _avg_lpips = val_res['lpips'] / val_res['samples']
-                _avg_dists = val_res['dists'] / val_res['samples']
+
                 valid_bar.set_description(
-                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnr']:.6f} dB; SSIM: {val_res['ssim']:.6f}; "
-                         f"LPIPS: {_avg_lpips:.6f}; DISTS: {_avg_dists:.6f}; ")
-        this_psnr = val_res['psnr']
-        this_ssim = val_res['ssim'].item()
-        this_lpips = val_res['lpips'] / val_res['samples']
+                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnrs'] / val_res['samples']:.6f} dB; "
+                         f"SSIM: {val_res['ssims']/val_res['samples']:.6f}; "
+                         f"DISTS:{val_res['dists'] / val_res['samples']:.6f}; "
+                )
+        this_psnr = val_res['psnrs'] / val_res['samples']
+        this_ssim = val_res['ssims'] / val_res['samples']
         this_dists = val_res['dists'] / val_res['samples']
         if this_ssim > best_ssim:
             best_ssim = this_ssim
             print(
                 f'Update SSIM ===> '
-                f'PSNR: {this_psnr:.6f} dB; SSIM: {this_ssim:.6f}; LPIPS: {this_lpips:.6f}; DISTS: {this_dists:.6f};')
+                f'PSNR: {this_psnr:.6f} dB; SSIM: {this_ssim:.6f}; DISTS: {this_dists:.6f};')
             torch.save(net.state_dict(), best_ckpt)
 
         if verbose:
@@ -171,7 +160,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
                                    global_step=epoch * len(train_bar))
             _val_writer.add_scalar(tag=f'psnr', scalar_value=this_psnr,
                                    global_step=epoch * len(train_bar))
-            _val_writer.add_scalar(tag=f'lpips', scalar_value=this_lpips,
+            _val_writer.add_scalar(tag=f'dists', scalar_value=this_dists,
                                    global_step=epoch * len(train_bar))
 
     # step5: save final ckpt
@@ -276,8 +265,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
 
         # step 4.2 staring valid
         # val_res 记录所有batch的总和
-        val_res = {'g_loss': 0, 'd_loss': 0, 'g_score': 0, 'd_score': 0, 'mse': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0,
-                   'samples': 0, 'lpips': 0, 'dists': 0}
+        val_res = {'g_loss': 0, 'ssims': 0, 'psnrs': 0, 'samples': 0, 'dists': 0}
         net_g.eval()
         net_d.eval()
         valid_bar = tqdm(valid_loader, colour='#fda085')
@@ -290,35 +278,27 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
                 sr = net_g(lr)
                 g_loss = criterion_g(sr, hr)
                 # loss
-                val_res['g_loss'] += g_loss.item() * batch_size
-                # mae & mse
-                _this_batch_mse = ((sr - hr) ** 2).mean()
-                _this_batch_mae = abs(sr - hr).mean()
-                val_res['mse'] += _this_batch_mse * batch_size
-                batch_ssim = ssim(sr, hr)
-                val_res['ssims'] += batch_ssim * batch_size
-                val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
-                val_res['ssim'] = val_res['ssims'] / val_res['samples']
-                # lpips
-                val_res['lpips'] += eval_lpips(sr, hr, lpips_fn)
-                # dists
+                val_res['g_loss'] += batch_size * g_loss.item()
+                val_res['ssims'] += batch_size * eval_ssim(sr, hr)
+                val_res['psnrs'] += batch_size * eval_psnr(sr, hr)
                 val_res['dists'] += eval_dists(sr, hr, dists_fn)
-                _avg_lpips = val_res['lpips'] / val_res['samples']
-                _avg_dists = val_res['dists'] / val_res['samples']
-                valid_bar.set_description(
-                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnr']:.6f} dB; SSIM: {val_res['ssim']:.6f}; "
-                         f"LPIPS: {_avg_lpips:.6f}; DISTS: {_avg_dists:.6f}; ")
 
-        this_psnr = val_res['psnr']
-        this_ssim = val_res['ssim'].item()
-        this_lpips = val_res['lpips'] / val_res['samples']
+                valid_bar.set_description(
+                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnrs'] / val_res['samples']:.6f} dB; "
+                         f"SSIM: {val_res['ssims'] / val_res['samples']:.6f}; "
+                         f"DISTS:{val_res['dists'] / val_res['samples']:.6f}; "
+                )
+
+        this_psnr = val_res['psnrs'] / val_res['samples']
+        this_ssim = val_res['ssims'] / val_res['samples']
         this_dists = val_res['dists'] / val_res['samples']
         if this_ssim > best_ssim:
             best_ssim = this_ssim
             print(
                 f'Update SSIM ===> '
-                f'PSNR: {this_psnr:.6f} dB; SSIM: {this_ssim:.6f}; LPIPS: {this_lpips:.6f}; DISTS: {this_dists:.6f};')
+                f'PSNR: {this_psnr:.6f} dB; SSIM: {this_ssim:.6f}; DISTS: {this_dists:.6f};')
             torch.save(net_g.state_dict(), best_ckpt)
+
         if verbose:
             _val_writer.add_scalar(tag=f'loss', scalar_value=val_res['g_loss'] / val_res['samples'],
                                    global_step=epoch * len(train_bar))
@@ -326,7 +306,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
                                    global_step=epoch * len(train_bar))
             _val_writer.add_scalar(tag=f'psnr', scalar_value=this_psnr,
                                    global_step=epoch * len(train_bar))
-            _val_writer.add_scalar(tag=f'lpips', scalar_value=this_lpips,
+            _val_writer.add_scalar(tag=f'dists', scalar_value=this_dists,
                                    global_step=epoch * len(train_bar))
 
     # step5: save final ckpt
