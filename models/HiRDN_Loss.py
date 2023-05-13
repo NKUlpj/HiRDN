@@ -6,6 +6,7 @@
 @Date: 2023/4/24 下午12:00 
 """
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,6 +15,19 @@ from DISTS_pytorch import DISTS
 import warnings
 
 warnings.filterwarnings("ignore")
+
+
+class PSNRLoss(nn.Module):
+
+    def __init__(self, loss_weight=1.0):
+        super(PSNRLoss, self).__init__()
+        self.loss_weight = loss_weight
+        self.scale = 10 / np.log(10)
+
+    def forward(self, pred, target):
+        assert len(pred.size()) == 4
+        assert len(target.size()) == 4
+        return self.loss_weight * self.scale * torch.log(((pred - target) ** 2).mean(dim=(1, 2, 3)) + 1e-8).mean()
 
 
 class LossL(nn.Module):
@@ -26,7 +40,7 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        self.loss_weights = [0.04, 0.01, 0.001, 1]
+        self.loss_weights = [0.04, 1.5e-04, 1.5e-04, 1]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
@@ -36,8 +50,9 @@ class LossL(nn.Module):
         self.loss_networks = loss_networks
         self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
         self.l1_loss = nn.L1Loss()
-        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.1)
+        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.84)
         self.dists_loss = DISTS()
+        self.psnr_loss = PSNRLoss(loss_weight=0.005)
 
     def forward(self, out_images, target_images):
         perception_loss = 0
@@ -48,8 +63,8 @@ class LossL(nn.Module):
             perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         ms_ssim_l1_loss = self.ms_ssim_l1_loss(out_images, target_images)
         dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
-        return self.loss_weights[-1] * ms_ssim_l1_loss + perception_loss + 0.005 * dists_loss
-
+        psnr_loss = self.psnr_loss(out_images, target_images)
+        return self.loss_weights[-1] * ms_ssim_l1_loss + perception_loss + 0.005 * dists_loss + psnr_loss
 
 
 class MS_SSIM_L1_LOSS(nn.Module):

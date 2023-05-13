@@ -7,7 +7,7 @@
 """
 
 from models.Common import *
-from models.Component import HiDB, UBlock
+from models.Component import HiDB
 import logging
 import torch
 import torch.nn as nn
@@ -30,9 +30,9 @@ class HiRDN(nn.Module):
             )
 
         # reduce channels
-        self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='lrelu')
+        self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='gelu')
         self.LR_conv = conv_layer(_hidden_channels, _hidden_channels, kernel_size=3)
-        self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='lrelu')
+        self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='gelu')
 
         # attention block
         if mode != 'T':

@@ -28,8 +28,6 @@ def eval_ssim(x, y):
 
 def eval_psnr(x, y):
     _psnr = peak_signal_noise_ratio(x, y).item()
-    if _psnr < 0:
-        _psnr = 0
     return _psnr
 
 

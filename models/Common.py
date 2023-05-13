@@ -67,6 +67,8 @@ def get_act_fn(act_type, inplace=True, neg_slope=0.05, n_prelu=1):
     act_type = act_type.lower()
     if act_type == 'relu':
         layer = nn.ReLU(inplace)
+    elif act_type == 'gelu':
+        layer = nn.GELU()
     elif act_type == 'lrelu':
         layer = nn.LeakyReLU(neg_slope, inplace)
     elif act_type == 'prelu':

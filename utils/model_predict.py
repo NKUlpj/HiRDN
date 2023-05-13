@@ -7,17 +7,14 @@
 """
 import os
 import time
-from math import log10
 
 import numpy as np
 from tqdm import tqdm
 import torch
-import lpips
 from DISTS_pytorch import DISTS
 
-from .evaluating import eval_lpips, eval_dists
-from .io_helper import together
-from .ssim import ssim
+from .evaluating import eval_dists, eval_ssim, eval_psnr
+from .io_helper import together, spread_matrix
 from .util_func import get_model, loader, get_device
 from .config import set_log_config, root_dir
 
@@ -27,14 +24,17 @@ import logging
 set_log_config()
 
 
-def __save_data(data, file):
-    np.savez_compressed(file, hic=data)
+def __save_data(data, compact, size, file):
+    data = spread_matrix(data, compact, size, convert_int=False, verbose=True)
+    np.savez_compressed(file, hic=data, compact=compact)
     logging.debug(f'Saving file - {file}')
 
 
 def __data_info(data):
+    indices = data['inds']
+    compacts = data['compacts'][()]
     sizes = data['sizes'][()]
-    return sizes
+    return indices, compacts, sizes
 
 
 def __data_name(path):
@@ -75,8 +75,6 @@ def __model_predict_without_target(model, _loader, ckpt_file):
 
 def __model_predict(model, _loader, ckpt_file):
     device = get_device()
-    lpips_fn = lpips.LPIPS(net='alex', verbose=False)
-    lpips_fn.to(device)
     dists_fn = DISTS()
     dists_fn.to(device)
     net = model.to(device)
@@ -88,7 +86,7 @@ def __model_predict(model, _loader, ckpt_file):
     res_data = []
     res_inds = []
     net.eval()
-    val_res = {'g_loss': 0, 'mse': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0, 'lpips': 0, 'dists': 0, 'samples': 0}
+    val_res = {'ssims': 0, 'psnrs': 0, 'dists': 0, 'samples': 0}
     predict_bar = tqdm(_loader, colour='#178069', desc="Predicting:")
     with torch.no_grad():
         for batch in predict_bar:
@@ -98,19 +96,15 @@ def __model_predict(model, _loader, ckpt_file):
             lr = lr.to(device)
             hr = hr.to(device)
             sr = net(lr)
-            batch_mse = ((sr - hr) ** 2).mean()
-            val_res['mse'] += batch_mse * batch_size
-            batch_ssim = ssim(sr, hr)
+
+            batch_ssim = eval_ssim(sr, hr)
             val_res['ssims'] += batch_ssim * batch_size
-            val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
-            val_res['ssim'] = val_res['ssims'] / val_res['samples']
-            val_res['lpips'] += eval_lpips(sr, hr, lpips_fn)
+            val_res['psnrs'] += eval_psnr(sr, hr) * batch_size
             val_res['dists'] += eval_dists(sr, hr, dists_fn)
-            _avg_lpips = val_res['lpips'] / val_res['samples']
             _avg_dists = val_res['dists'] / val_res['samples']
             predict_bar.set_description(
-                desc=f"[Predicting in Test set] PSNR: {val_res['psnr']:.6f} dB; SSIM: {val_res['ssim']:.6f}; "
-                     f"LPIPS: {_avg_lpips:.6f}; DISTS: {_avg_dists:.6f}; ")
+                desc=f"[Predicting in Test set] PSNR: {val_res['psnrs']/val_res['samples']:.6f} dB;"
+                     f"SSIM: {val_res['ssims']/val_res['samples']:.6f};  DISTS: {_avg_dists:.6f}; ")
             predict_data = sr.to('cpu').numpy()
             predict_data[predict_data < 0] = 0  # no Negative Number
             res_data.append(predict_data)
@@ -120,11 +114,10 @@ def __model_predict(model, _loader, ckpt_file):
     res_data = np.concatenate(res_data, axis=0)
     res_inds = np.concatenate(res_inds, axis=0)
     res_hic = together(res_data, res_inds, tag='Reconstructing: ')
-    this_ssim = val_res['ssim']
-    this_psnr = val_res['psnr']
-    this_lpips = val_res['lpips'] / val_res['samples']
+    this_ssim = val_res['ssims'] / val_res['samples']
+    this_psnr = val_res['psnrs'] / val_res['samples']
     this_dists = val_res['dists'] / val_res['samples']
-    logging.debug(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f}; LPIPS:{this_lpips:.6f}; DISTS:{this_dists:.6f};')
+    logging.debug(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f}; ; DISTS:{this_dists:.6f};')
     return res_hic
 
 
@@ -154,7 +147,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     logging.debug(f'Model running cost is {(end - start):.6f} s.')
 
     # 5） return, put save code in main func as multiprocess must be created in main
-    sizes = __data_info(predict_data_np)
+    indices, compacts, sizes = __data_info(predict_data_np)
 
     out_dir = os.path.join(root_dir, 'predict')
     data_name = __data_name(predict_file)
@@ -162,7 +155,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     # 6) save data
     def save_data_n(_key):
         __file = os.path.join(out_dir, f'Predict_{model_name}_{data_name}_chr{_key}.npz')
-        __save_data(res_hic[_key], __file)
+        __save_data(res_hic[_key], compacts[_key], sizes[_key],  __file)
 
     for key in sizes.keys():
         save_data_n(key)

@@ -57,7 +57,7 @@ def get_model(_model_name):
 
     elif _model_name == 'DeepHiC':
         _padding = False
-        _netG = DeepHiC.Generator(1, in_channel=1, res_block_num=5)
+        _netG = DeepHiC.Generator()
         _netD = DeepHiC.Discriminator(in_channel=1)
     else:
         raise NotImplementedError('Model {} is not implemented'.format(_model_name))

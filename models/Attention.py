@@ -68,7 +68,7 @@ class PA(nn.Module):
         super(PA, self).__init__()
         self.pa = nn.Sequential(
             nn.Conv2d(channels, channels // reduction, 1, padding='same', bias=True),
-            nn.ReLU(inplace=True),
+            nn.GELU(),
             nn.Conv2d(channels // reduction, 1, 1, padding='same', bias=True),
             nn.Sigmoid()
         )
@@ -85,7 +85,7 @@ class CA(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.conv_du = nn.Sequential(
             nn.Conv2d(channels, channels // reduction, 1, padding=0, bias=True),
-            nn.ReLU(inplace=True),
+            nn.GELU(),
             nn.Conv2d(channels // reduction, channels, 1, padding=0, bias=True),
             nn.Sigmoid()
         )

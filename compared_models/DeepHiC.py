@@ -1,12 +1,4 @@
-# -*- coding: UTF-8 -*-
-"""
-@Project: HiRDN
-@File: DeepHiC.py
-@Author: nkul
-@Date: 2023/4/10 下午1:17
 # Code was taken from https://github.com/omegahh/DeepHiC
-"""
-
 import torch
 import torch.nn as nn
 
@@ -15,9 +7,10 @@ def swish(x):
     return x * torch.sigmoid(x)
 
 
-class ResidualBlock(nn.Module):
+# DeepHiC Residual Block
+class residualBlock(nn.Module):
     def __init__(self, channels, k=3, s=1):
-        super(ResidualBlock, self).__init__()
+        super(residualBlock, self).__init__()
 
         self.conv1 = nn.Conv2d(channels, channels, k, stride=s, padding=1)
         self.bn1 = nn.BatchNorm2d(channels)
@@ -31,39 +24,31 @@ class ResidualBlock(nn.Module):
         return x + residual
 
 
+# DeepHiC Generator
 class Generator(nn.Module):
-    def __init__(self, scale_factor, in_channel=3, res_block_num=5):
+    def __init__(self, num_channels=64, resblock_num=5):
         super(Generator, self).__init__()
-        self.conv1 = nn.Conv2d(
-            in_channel,
-            64,
-            kernel_size=9,
-            stride=1,
-            padding=4)
+        self.conv1 = nn.Conv2d(1, num_channels, kernel_size=9, stride=1, padding=4)
         # have a swish here in forward
 
-        res_blocks = [ResidualBlock(64) for _ in range(res_block_num)]
-        self.res_blocks = nn.Sequential(*res_blocks)
+        resblocks = [residualBlock(num_channels) for _ in range(resblock_num)]
+        self.resblocks = nn.Sequential(*resblocks)
 
-        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
+        self.conv2 = nn.Conv2d(num_channels, num_channels, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(num_channels)
         # have a swish here in forward
 
-        self.conv3 = nn.Conv2d(
-            64,
-            in_channel,
-            kernel_size=9,
-            stride=1,
-            padding=4)
+        self.conv3 = nn.Conv2d(num_channels, 1, kernel_size=9, stride=1, padding=4)
 
     def forward(self, x):
         emb = swish(self.conv1(x))
-        x = self.res_blocks(emb)
+        x = self.resblocks(emb)
         x = swish(self.bn2(self.conv2(x)))
         x = self.conv3(x + emb)
         return (torch.tanh(x) + 1) / 2
 
 
+# DeepHiC Discriminator
 class Discriminator(nn.Module):
     def __init__(self, in_channel=3):
         super(Discriminator, self).__init__()
@@ -81,7 +66,7 @@ class Discriminator(nn.Module):
         self.bn6 = nn.BatchNorm2d(256)
         # Replaced original paper FC layers with FCN
         self.conv7 = nn.Conv2d(256, 1, 1, stride=1, padding=0)
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, x):
         batch_size = x.size(0)
@@ -94,5 +79,5 @@ class Discriminator(nn.Module):
         x = swish(self.bn6(self.conv6(x)))
 
         x = self.conv7(x)
-        x = self.avg_pool(x)
+        x = self.avgpool(x)
         return torch.sigmoid(x.view(batch_size))

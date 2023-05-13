@@ -44,11 +44,11 @@ def __set_up(seed=3407):
     random.seed(seed)
 
     # using a deterministic cuda
-    torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.deterministic = True
 
 
 def __adjust_learning_rate(epoch):
-    lr = 0.0005 * (0.1 ** (epoch // 10))
+    lr = 0.0003 * (0.1 ** (epoch // 30))
     return lr
 
 
@@ -80,7 +80,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     dists_fn.to(device)
 
     _optimizer = optim.Adam(net.parameters(), lr=1e-4)
-    _scheduler = CosineAnnealingLR(_optimizer, max_epochs)
+    # _scheduler = CosineAnnealingLR(_optimizer, max_epochs)
 
     # step 4: start train
     _train_writer = None
@@ -91,8 +91,8 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     for epoch in range(1, max_epochs + 1):
         run_res = {'samples': 0, 'g_loss': 0, 'g_score': 0}
         # update by @nkul
-        # alr = __adjust_learning_rate(epoch)
-        # optimizer = optim.Adam(net.parameters(), lr=alr)
+        alr = __adjust_learning_rate(epoch)
+        optimizer = optim.Adam(net.parameters(), lr=alr)
         # free memory
         for p in net.parameters():
             if p.grad is not None:
@@ -111,7 +111,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
             g_loss.backward()
             _optimizer.step()
             # update by @nkul
-            # optimizer.step()
+            optimizer.step()
             run_res['g_loss'] += g_loss.item() * batch_size
             train_bar.set_description(
                 desc=f"[{epoch}/{max_epochs}] Loss_G: {run_res['g_loss'] / run_res['samples']:.6f}"
@@ -119,7 +119,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
             if verbose and _step % 100 == 0:
                 _train_writer.add_scalar(tag=f'loss', scalar_value=g_loss, global_step=epoch * len(train_bar) + _step)
         # update by @nkul
-        _scheduler.step()
+        # _scheduler.step()
 
         # step 4.2 staring valid
         # val_res 记录所有batch的总和

@@ -107,7 +107,7 @@ def data_down_parser():
         description=textwrap.dedent('''\
             A tools to down sample data from high resolution data.
             ----------------------------------------------------------------------
-            Use example : python ./data/down_sample.py -hr 10kb -lr 40kb -r 16 -c GM12878
+            Use example : python ./datasets/down_sample.py -hr 10kb -r 16 -c GM12878
             ----------------------------------------------------------------------
         '''
                                     ),
@@ -126,13 +126,6 @@ def data_down_parser():
         help='Required: High resolution specified[example:10kb]',
         default='10kb',
         choices=res_map.keys(),
-        required=True
-    )
-    req_args.add_argument(
-        '-lr',
-        dest='low_res',
-        help='Required: Low resolution specified[example:40kb]',
-        default='40kb',
         required=True
     )
     req_args.add_argument(
@@ -155,7 +148,7 @@ def data_divider_parser():
         description=textwrap.dedent('''\
             A tools to divide data for train, predict and test.
             ----------------------------------------------------------------------------------------------------------
-            Use example : python ./data/split.py -hr 10kb -lr 40kb -s train -chunk 64 -stride 64 -bound 201 -c GM12878
+            Use example : python ./datasets/split.py -hr 10kb -r 16 -s train -chunk 64 -stride 64 -bound 201 -c GM12878
             ----------------------------------------------------------------------------------------------------------
         '''
                                     ),
@@ -180,11 +173,12 @@ def data_divider_parser():
         required=True
     )
     req_args.add_argument(
-        '-lr',
-        dest='low_res',
-        help='Required: Low resolution specified[example:40kb]',
-        default='40kb',
-        required=True
+        '-r',
+        dest='ratio',
+        help='Required: down_sampled ration[example:16]',
+        default=16,
+        required=True,
+        type=int
     )
     req_args.add_argument(
         '-s',
