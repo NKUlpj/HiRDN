@@ -44,11 +44,11 @@ def __read_data(data_file, norm_file, _out_dir, _resolution):
     filename = os.path.basename(data_file).split('.')[0] + '.npz'
     out_file = os.path.join(_out_dir, filename)
     try:
-        _hic, _idx = read_coo2mat(data_file, norm_file, _resolution)
+        _hic = read_coo2mat(data_file, norm_file, _resolution)
     except NotImplementedError:
         logging.error(f'Abnormal file: {norm_file}')
         exit()
-    np.savez_compressed(out_file, hic=_hic, compact=_idx)
+    np.savez_compressed(out_file, hic=_hic)
     logging.debug(f'Saving file:{out_file}')
 
 

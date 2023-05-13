@@ -14,7 +14,7 @@ import torch
 from DISTS_pytorch import DISTS
 
 from .evaluating import eval_dists, eval_ssim, eval_psnr
-from .io_helper import together, spread_matrix
+from .io_helper import together
 from .util_func import get_model, loader, get_device
 from .config import set_log_config, root_dir
 
@@ -24,17 +24,15 @@ import logging
 set_log_config()
 
 
-def __save_data(data, compact, size, file):
-    data = spread_matrix(data, compact, size, convert_int=False, verbose=True)
-    np.savez_compressed(file, hic=data, compact=compact)
+def __save_data(data, file):
+    np.savez_compressed(file, hic=data)
     logging.debug(f'Saving file - {file}')
 
 
 def __data_info(data):
     indices = data['inds']
-    compacts = data['compacts'][()]
     sizes = data['sizes'][()]
-    return indices, compacts, sizes
+    return indices, sizes
 
 
 def __data_name(path):
@@ -145,7 +143,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     logging.debug(f'Model running cost is {(end - start):.6f} s.')
 
     # 5） return, put save code in main func as multiprocess must be created in main
-    indices, compacts, sizes = __data_info(predict_data_np)
+    indices, sizes = __data_info(predict_data_np)
 
     out_dir = os.path.join(root_dir, 'predict')
     data_name = __data_name(predict_file)
@@ -153,7 +151,7 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     # 6) save data
     def save_data_n(_key):
         __file = os.path.join(out_dir, f'Predict_{model_name}_{data_name}_chr{_key}.npz')
-        __save_data(res_hic[_key], compacts[_key], sizes[_key],  __file)
+        __save_data(res_hic[_key],  __file)
 
     for key in sizes.keys():
         save_data_n(key)
