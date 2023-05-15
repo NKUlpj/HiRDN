@@ -15,11 +15,10 @@ import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
-import lpips
 from DISTS_pytorch import DISTS
 
 from .util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
-from .evaluating import eval_lpips, eval_dists, eval_ssim, eval_psnr
+from .evaluating import eval_dists
 from .ssim import ssim
 
 import warnings
@@ -121,7 +120,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
 
         # step 4.2 staring valid
         # val_res 记录所有batch的总和
-        val_res = {'g_loss': 0,  'ssims': 0, 'psnrs': 0, 'samples': 0, 'dists': 0}
+        val_res = {'g_loss': 0,  'ssims': 0, 'psnr': 0, 'samples': 0, 'dists': 0, 'mse': 0}
         net.eval()
         valid_bar = tqdm(valid_loader, colour='#fda085')
         with torch.no_grad():
@@ -134,16 +133,18 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
                 g_loss = criterion(sr, hr)
                 # loss
                 val_res['g_loss'] += batch_size * g_loss.item()
-                val_res['ssims'] += batch_size * eval_ssim(sr, hr)
-                val_res['psnrs'] += batch_size * eval_psnr(sr, hr)
+                batch_mse = ((sr - hr) ** 2).mean()
+                val_res['mse'] += batch_mse * batch_size
+                val_res['ssims'] += batch_size * ssim(sr, hr)
+                val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
                 val_res['dists'] += eval_dists(sr, hr, dists_fn)
 
                 valid_bar.set_description(
-                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnrs'] / val_res['samples']:.6f} dB; "
+                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnr']:.6f} dB; "
                          f"SSIM: {val_res['ssims']/val_res['samples']:.6f}; "
                          f"DISTS:{val_res['dists'] / val_res['samples']:.6f}; "
                 )
-        this_psnr = val_res['psnrs'] / val_res['samples']
+        this_psnr = val_res['psnr']
         this_ssim = val_res['ssims'] / val_res['samples']
         this_dists = val_res['dists'] / val_res['samples']
         if this_ssim > best_ssim:
@@ -201,8 +202,6 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
     # optimizer
     optimizer_g = optim.Adam(net_g.parameters(), lr=0.0001)
     optimizer_d = optim.Adam(net_d.parameters(), lr=0.0001)
-    lpips_fn = lpips.LPIPS(net='vgg', verbose=False)
-    lpips_fn.to(device)
     dists_fn = DISTS()
     dists_fn.to(device)
 
@@ -265,7 +264,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
 
         # step 4.2 staring valid
         # val_res 记录所有batch的总和
-        val_res = {'g_loss': 0, 'ssims': 0, 'psnrs': 0, 'samples': 0, 'dists': 0}
+        val_res = {'g_loss': 0, 'ssims': 0, 'psnr': 0, 'samples': 0, 'dists': 0, 'mse': 0}
         net_g.eval()
         net_d.eval()
         valid_bar = tqdm(valid_loader, colour='#fda085')
@@ -279,17 +278,19 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
                 g_loss = criterion_g(sr, hr)
                 # loss
                 val_res['g_loss'] += batch_size * g_loss.item()
-                val_res['ssims'] += batch_size * eval_ssim(sr, hr)
-                val_res['psnrs'] += batch_size * eval_psnr(sr, hr)
+                batch_mse = ((sr - hr) ** 2).mean()
+                val_res['mse'] += batch_mse * batch_size
+                val_res['ssims'] += batch_size * ssim(sr, hr)
+                val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
                 val_res['dists'] += eval_dists(sr, hr, dists_fn)
 
                 valid_bar.set_description(
-                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnrs'] / val_res['samples']:.6f} dB; "
+                    desc=f"[Predicting in Valid set] PSNR: {val_res['psnr']:.6f} dB; "
                          f"SSIM: {val_res['ssims'] / val_res['samples']:.6f}; "
                          f"DISTS:{val_res['dists'] / val_res['samples']:.6f}; "
                 )
 
-        this_psnr = val_res['psnrs'] / val_res['samples']
+        this_psnr = val_res['psnr']
         this_ssim = val_res['ssims'] / val_res['samples']
         this_dists = val_res['dists'] / val_res['samples']
         if this_ssim > best_ssim:

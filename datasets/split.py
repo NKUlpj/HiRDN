@@ -17,7 +17,7 @@ from utils.io_helper import divide
 import numpy as np
 import time
 import logging
-from utils.config import set_log_config, root_dir, set_dict
+from utils.config import set_log_config, root_dir, set_dict, set_lr_cutoff
 set_log_config()
 
 
@@ -77,10 +77,11 @@ if __name__ == '__main__':
 
     start = time.time()
     results = []
+    lr_cutoff = set_lr_cutoff[ratio]
     for n in chr_list:
         high_file = os.path.join(data_dir, f'chr{n}_{high_res}.npz')
         down_file = os.path.join(data_dir, f'chr{n}_{high_res}_{low_res}.npz')
-        res = __data_divider(n, high_file, down_file, chunk, stride, bound)
+        res = __data_divider(n, high_file, down_file, chunk, stride, bound, lr_cutoff=lr_cutoff)
         results.append(res)
 
     logging.debug(f'All data generated. Running cost is {(time.time()-start)/60:.1f} min.')

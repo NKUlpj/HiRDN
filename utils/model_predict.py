@@ -7,14 +7,16 @@
 """
 import os
 import time
+from math import log10
 
 import numpy as np
 from tqdm import tqdm
 import torch
 from DISTS_pytorch import DISTS
 
-from .evaluating import eval_dists, eval_ssim, eval_psnr
+from .evaluating import eval_dists
 from .io_helper import together
+from .ssim import ssim
 from .util_func import get_model, loader, get_device
 from .config import set_log_config, root_dir
 
@@ -84,7 +86,7 @@ def __model_predict(model, _loader, ckpt_file):
     res_data = []
     res_inds = []
     net.eval()
-    val_res = {'ssims': 0, 'psnrs': 0, 'dists': 0, 'samples': 0}
+    val_res = {'ssims': 0, 'psnr': 0, 'dists': 0, 'samples': 0, 'mse': 0}
     predict_bar = tqdm(_loader, colour='#178069', desc="Predicting:")
     with torch.no_grad():
         for batch in predict_bar:
@@ -94,12 +96,15 @@ def __model_predict(model, _loader, ckpt_file):
             lr = lr.to(device)
             hr = hr.to(device)
             sr = net(lr)
-            val_res['ssims'] += eval_ssim(sr, hr) * batch_size
-            val_res['psnrs'] += eval_psnr(sr, hr) * batch_size
+            # sr = lr
+            batch_mse = ((sr - hr) ** 2).mean()
+            val_res['mse'] += batch_mse * batch_size
+            val_res['ssims'] += ssim(sr, hr) * batch_size
+            val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
             val_res['dists'] += eval_dists(sr, hr, dists_fn)
             _avg_dists = val_res['dists'] / val_res['samples']
             predict_bar.set_description(
-                desc=f"[Predicting in Test set] PSNR: {val_res['psnrs']/val_res['samples']:.6f} dB;"
+                desc=f"[Predicting in Test set] PSNR: {val_res['psnr']:.6f} dB;"
                      f"SSIM: {val_res['ssims']/val_res['samples']:.6f};  DISTS: {_avg_dists:.6f}; ")
             predict_data = sr.to('cpu').numpy()
             predict_data[predict_data < 0] = 0  # no Negative Number
@@ -111,9 +116,9 @@ def __model_predict(model, _loader, ckpt_file):
     res_inds = np.concatenate(res_inds, axis=0)
     res_hic = together(res_data, res_inds, tag='Reconstructing: ')
     this_ssim = val_res['ssims'] / val_res['samples']
-    this_psnr = val_res['psnrs'] / val_res['samples']
+    this_psnr = val_res['psnr']
     this_dists = val_res['dists'] / val_res['samples']
-    logging.debug(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f}; ; DISTS:{this_dists:.6f};')
+    logging.debug(f'SSIM:{this_ssim:.6f}; PSNR:{this_psnr:.6f};  DISTS:{this_dists:.6f};')
     return res_hic
 
 

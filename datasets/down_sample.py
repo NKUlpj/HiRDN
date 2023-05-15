@@ -39,8 +39,8 @@ if __name__ == '__main__':
     low_res = f"{ratio}ds"
     data_dir = os.path.join(root_dir, 'mat', cell_line)
     in_files = [os.path.join(data_dir, f)
-                for f in os.listdir(data_dir) if f.find(high_res) >= 0]
-
+                for f in os.listdir(data_dir) if f.find(high_res + '.npz') >= 0]
+    logging.debug(f'find files:{in_files}')
     logging.debug(f'Generating {low_res} files from {high_res} files by {ratio}x down_sampling.')
     start = time.time()
     for file in in_files:
