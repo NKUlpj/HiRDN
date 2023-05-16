@@ -14,8 +14,8 @@ from tqdm import tqdm
 import torch
 from DISTS_pytorch import DISTS
 
-from .evaluating import eval_dists
-from .io_helper import together
+from .io_helper import together, spread_matrix
+from .parser_helper import mkdir
 from .ssim import ssim
 from .util_func import get_model, loader, get_device
 from .config import set_log_config, root_dir
@@ -26,15 +26,22 @@ import logging
 set_log_config()
 
 
-def __save_data(data, file):
-    np.savez_compressed(file, hic=data)
+def __save_data(data, compact, size, file):
+    data = spread_matrix(data, compact, size, convert_int=False, verbose=True)
+    np.savez_compressed(file, hic=data, compact=compact)
     logging.debug(f'Saving file - {file}')
+
+
+def __eval_dists(x, y, loss_fn):
+    _lpips = loss_fn(x, y).sum().item()
+    return _lpips
 
 
 def __data_info(data):
     indices = data['inds']
+    compacts = data['compacts'][()]
     sizes = data['sizes'][()]
-    return indices, sizes
+    return indices, compacts, sizes
 
 
 def __data_name(path):
@@ -96,12 +103,12 @@ def __model_predict(model, _loader, ckpt_file):
             lr = lr.to(device)
             hr = hr.to(device)
             sr = net(lr)
-            # sr = lr
+            # sr = hr
             batch_mse = ((sr - hr) ** 2).mean()
             val_res['mse'] += batch_mse * batch_size
             val_res['ssims'] += ssim(sr, hr) * batch_size
             val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
-            val_res['dists'] += eval_dists(sr, hr, dists_fn)
+            val_res['dists'] += __eval_dists(sr, hr, dists_fn)
             _avg_dists = val_res['dists'] / val_res['samples']
             predict_bar.set_description(
                 desc=f"[Predicting in Test set] PSNR: {val_res['psnr']:.6f} dB;"
@@ -148,15 +155,16 @@ def model_predict(model_name, predict_file,  _batch_size, ckpt):
     logging.debug(f'Model running cost is {(end - start):.6f} s.')
 
     # 5） return, put save code in main func as multiprocess must be created in main
-    indices, sizes = __data_info(predict_data_np)
+    indices, compacts, sizes = __data_info(predict_data_np)
 
-    out_dir = os.path.join(root_dir, 'predict')
+    out_dir = os.path.join(root_dir, 'predict', model_name)
+    mkdir(out_dir)
     data_name = __data_name(predict_file)
 
     # 6) save data
     def save_data_n(_key):
-        __file = os.path.join(out_dir, f'Predict_{model_name}_{data_name}_chr{_key}.npz')
-        __save_data(res_hic[_key],  __file)
+        __file = os.path.join(out_dir, f'{data_name}_chr{_key}.npz')
+        __save_data(res_hic[_key], compacts[key], sizes[key], __file)
 
-    for key in sizes.keys():
+    for key in compacts.keys():
         save_data_n(key)

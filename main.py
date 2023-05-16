@@ -8,9 +8,9 @@
 
 if __name__ == '__main__':
     print(
-        f" For read raw data, run: python ./data/read_prepare.py -h\n",
-        f"For down sample data, run: python ./data/down_sample.py -h\n",
-        f"For split data, run: python ./data/split.py -h\n",
+        f" For read raw data, run: python ./datasets/read_prepare.py -h\n",
+        f"For down sample data, run: python ./datasets/down_sample.py -h\n",
+        f"For split data, run: python ./datasets/split.py -h\n",
         f"For train, run: python ./train.py -h\n",
         f"For predict, run: python ./predict.py -h"
     )

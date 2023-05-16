@@ -58,7 +58,7 @@ def data_read_parser():
         description=textwrap.dedent('''\
             A tools to read raw data from Rao's Hi-C experiment.
             ------------------------------------------------------
-            Use example : python ./data/read_prepare.py -c GM12878
+            Use example : python ./datasets/read_prepare.py -c GM12878
             ------------------------------------------------------
         '''
                                     ),

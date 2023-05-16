@@ -36,9 +36,6 @@ class HiRDN(nn.Module):
 
         # attention block
         if mode != 'T':
-            # _block_channels = 8
-            # logging.debug('HiRDN is using UNet Attention')
-            # self.attn = UBlock(in_channels=in_channels, hidden_channels=_block_channels, out_channels=out_channels)
             self.ca = get_attn_by_name('CA', _hidden_channels * _block_num)
             self.pa = get_attn_by_name('PA', _hidden_channels * _block_num)
 
@@ -58,7 +55,4 @@ class HiRDN(nn.Module):
         out_b = self.c(x1)
         out_lr = self.LR_conv(out_b) + out_fea
         output = self.exit(out_lr)
-        if hasattr(self, 'attn') and self.attn is not None:
-            return output * self.attn(output)
-        else:
-            return output
+        return output

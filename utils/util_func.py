@@ -77,7 +77,7 @@ def loader(file_name, loader_type='Train', padding=False, shuffle=True, batch_si
         __input_tensor = F.pad(__input_tensor, (6, 6, 6, 6), mode='constant')
 
     __inds_np = __file_np['inds']
-    __inds_tensor = torch.tensor(__inds_np, dtype=torch.int)
+    __inds_tensor = torch.tensor(__inds_np, dtype=torch.long)
     logging.debug(f"{loader_type} Set Size - {__input_tensor.size()}")
 
     __has_target = False
@@ -117,10 +117,10 @@ def get_d_loss_fn(_model_name):
 
 def get_loss_fn(_model_name, device='cpu'):
     if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
-        logging.debug('Using HiRDN_T_Loss')
+        logging.debug('Using HiRDN_Loss')
         loss = HiRDN_Loss.LossL(device=device)
     elif _model_name == 'HiRDN_L':
-        logging.debug('Using HiRDN_L_Loss')
+        logging.debug('Using HiRDN_Loss')
         loss = HiRDN_Loss.LossL(device=device)
     elif _model_name == 'DeepHiC':
         logging.debug('Using DeepHiC_Loss')

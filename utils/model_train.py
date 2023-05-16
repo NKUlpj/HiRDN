@@ -13,12 +13,11 @@ from math import log10
 from tqdm import tqdm
 import torch
 import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingLR
+# from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from DISTS_pytorch import DISTS
 
 from .util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
-from .evaluating import eval_dists
 from .ssim import ssim
 
 import warnings
@@ -49,6 +48,11 @@ def __set_up(seed=3407):
 def __adjust_learning_rate(epoch):
     lr = 0.0003 * (0.1 ** (epoch // 30))
     return lr
+
+
+def __eval_dists(x, y, loss_fn):
+    _lpips = loss_fn(x, y).sum().item()
+    return _lpips
 
 
 def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
@@ -137,7 +141,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
                 val_res['mse'] += batch_mse * batch_size
                 val_res['ssims'] += batch_size * ssim(sr, hr)
                 val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
-                val_res['dists'] += eval_dists(sr, hr, dists_fn)
+                val_res['dists'] += __eval_dists(sr, hr, dists_fn)
 
                 valid_bar.set_description(
                     desc=f"[Predicting in Valid set] PSNR: {val_res['psnr']:.6f} dB; "
@@ -282,7 +286,7 @@ def __train_gan(_net_g, _net_d, model_name, train_loader, valid_loader, max_epoc
                 val_res['mse'] += batch_mse * batch_size
                 val_res['ssims'] += batch_size * ssim(sr, hr)
                 val_res['psnr'] = 10 * log10(1 / (val_res['mse'] / val_res['samples']))
-                val_res['dists'] += eval_dists(sr, hr, dists_fn)
+                val_res['dists'] += __eval_dists(sr, hr, dists_fn)
 
                 valid_bar.set_description(
                     desc=f"[Predicting in Valid set] PSNR: {val_res['psnr']:.6f} dB; "

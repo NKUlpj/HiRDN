@@ -27,7 +27,7 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        self.loss_weights = [0.004, 1.5e-06, 1.5e-06, 1]
+        self.loss_weights = [0.001, 1.5e-06, 1.5e-06, 1]
         loss_networks = []
         for layer in [3, 8, 15]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
@@ -36,8 +36,8 @@ class LossL(nn.Module):
             loss_networks.append(loss_network)
         self.loss_networks = loss_networks
         self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
-        # self.l1_loss = nn.L1Loss()
-        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.15)
+        self.l1_loss = nn.L1Loss()
+        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.025)
         self.dists_loss = DISTS()
 
     def forward(self, out_images, target_images):
@@ -49,6 +49,7 @@ class LossL(nn.Module):
             perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         ms_ssim_l1_loss = self.ms_ssim_l1_loss(out_images, target_images)
         dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
+        # l1_loss = self.l1_loss(out_images, target_images)
         return ms_ssim_l1_loss + perception_loss + 0.008 * dists_loss
 
 

@@ -24,11 +24,11 @@ def read_coo2mat(coo_file, norm_file, resolution):
     """
     norm = open(norm_file, 'r').readlines()
     norm = np.array(list(map(float, norm)))
-    pd_mat = pd.read_csv(coo_file, sep='\t', header=None, dtype=int)
+    compact_idx = list(np.where(np.isnan(norm) ^ True)[0])
+    pd_mat = pd.read_csv(coo_file, sep='\t', header=None, dtype=np.int32)
     row = pd_mat[0].values // resolution
     col = pd_mat[1].values // resolution
     val = pd_mat[2].values
-
     # here is a full HiC Matrix
     mat = coo_matrix((val, (row, col)), shape=(len(norm), len(norm))).toarray()
     mat = mat.astype(float)
@@ -36,7 +36,7 @@ def read_coo2mat(coo_file, norm_file, resolution):
     mat = mat / norm
     mat = mat.T / norm
     _hic = mat + np.tril(mat, -1).T
-    return _hic.astype(int)
+    return _hic.astype(np.int32), compact_idx
 
 
 def __dense2tag(matrix):
@@ -110,6 +110,33 @@ def divide(mat, chr_num, chunk_size=64, stride=64, bound=201, padding=True, spec
                       f'with chunk={chunk_size}, stride={stride}, bound={bound}')
     index = np.array(index)
     return result, index
+
+
+def compact_matrix(matrix, compact_idx, verbose=False):
+    """
+    Compacts the matrix according to the index list.
+    """
+    compact_size = len(compact_idx)
+    result = np.zeros((compact_size, compact_size)).astype(matrix.dtype)
+    if verbose:
+        logging.debug(f'Compacting a {matrix.shape} shaped matrix to{result.shape} shaped!')
+    for i, idx in enumerate(compact_idx):
+        result[i, :] = matrix[idx][compact_idx]
+    return result
+
+
+def spread_matrix(c_mat, compact_idx, full_size, convert_int=True, verbose=False):
+    """
+    Spreads the matrix according to the index list (a reversed operation to compactM).
+    """
+    result = np.zeros((full_size, full_size)).astype(c_mat.dtype)
+    if convert_int:
+        result = result.astype(np.int32)
+    if verbose:
+        logging.debug(f'Spreading a{c_mat.shape} shaped matrix to{result.shape} shaped!')
+    for i, s_idx in enumerate(compact_idx):
+        result[s_idx, compact_idx] = c_mat[i]
+    return result
 
 
 def together(mat_list, indices, corp=0, species='hsa', tag='HiC'):
