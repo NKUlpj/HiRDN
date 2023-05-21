@@ -13,10 +13,8 @@ from math import log10
 from tqdm import tqdm
 import torch
 import torch.optim as optim
-# from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from DISTS_pytorch import DISTS
-
 from .util_func import get_device, get_model, loader, get_loss_fn, get_d_loss_fn
 from .ssim import ssim
 
@@ -80,7 +78,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
     dists_fn = DISTS()
     dists_fn.to(device)
 
-    _optimizer = optim.Adam(net.parameters(), lr=1e-4)
+    # _optimizer = optim.Adam(net.parameters(), lr=1e-4)
     # _scheduler = CosineAnnealingLR(_optimizer, max_epochs)
 
     # step 4: start train
@@ -95,6 +93,7 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
         alr = __adjust_learning_rate(epoch)
         optimizer = optim.Adam(net.parameters(), lr=alr)
         # free memory
+        # _optimizer.zero_grad()
         for p in net.parameters():
             if p.grad is not None:
                 del p.grad
@@ -110,8 +109,8 @@ def __train(model, model_name, train_loader, valid_loader, max_epochs, verbose):
             net.zero_grad()
             g_loss = criterion(fake_imgs, real_imgs)
             g_loss.backward()
-            _optimizer.step()
             # update by @nkul
+            # _optimizer.step()
             optimizer.step()
             run_res['g_loss'] += g_loss.item() * batch_size
             train_bar.set_description(

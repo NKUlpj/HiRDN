@@ -5,13 +5,10 @@
 @Author: nkul
 @Date: 2023/4/24 下午12:00 
 """
-
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models.vgg import vgg16
-from DISTS_pytorch import DISTS
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -27,18 +24,16 @@ class LossL(nn.Module):
         vgg = vgg16(pretrained=True)
         # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        self.loss_weights = [0.001, 1.5e-06, 1.5e-06, 1]
+        self.loss_weights = [0.1, 0.1]
         loss_networks = []
-        for layer in [3, 8, 15]:
+        for layer in [8, 35]:
             loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
             for param in loss_network.parameters():
                 param.requires_grad = False
             loss_networks.append(loss_network)
         self.loss_networks = loss_networks
         self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
-        self.l1_loss = nn.L1Loss()
-        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.025)
-        self.dists_loss = DISTS()
+        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.84)
 
     def forward(self, out_images, target_images):
         perception_loss = 0
@@ -48,9 +43,7 @@ class LossL(nn.Module):
             _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
             perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
         ms_ssim_l1_loss = self.ms_ssim_l1_loss(out_images, target_images)
-        dists_loss = self.dists_loss(out_images, target_images, require_grad=True, batch_average=True)
-        # l1_loss = self.l1_loss(out_images, target_images)
-        return ms_ssim_l1_loss + perception_loss + 0.008 * dists_loss
+        return ms_ssim_l1_loss + perception_loss
 
 
 class MS_SSIM_L1_LOSS(nn.Module):
@@ -58,6 +51,7 @@ class MS_SSIM_L1_LOSS(nn.Module):
     Some Code from https://github.com/psyrocloud/MS-SSIM_L1_LOSS
     Paper "Loss Functions for Image Restoration With Neural Networks"
     """
+
     def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.84, compensation=1, channel=1):
         super(MS_SSIM_L1_LOSS, self).__init__()
         gaussian_sigmas = [0.5, 1.0, 2.0, 4.0, 8.0]
@@ -142,6 +136,5 @@ class MS_SSIM_L1_LOSS(nn.Module):
                                groups=c, padding=self.pad).mean(1)  # [B, H, W]
 
         loss_mix = self.alpha * loss_ms_ssim + (1 - self.alpha) * gaussian_l1 / self.DR
-        loss_mix = self.compensation * loss_mix
-
         return loss_mix.mean()
+

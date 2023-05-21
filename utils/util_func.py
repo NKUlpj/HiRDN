@@ -38,10 +38,10 @@ def get_model(_model_name):
     _netD = None
 
     if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
-        _netG = HiRDN.HiRDN(mode='T')
+        _netG = HiRDN.HiRDN()
 
     elif _model_name == 'HiRDN_L':
-        _netG = HiRDN.HiRDN(mode='L')
+        _netG = HiRDN.HiRDN()
 
     elif _model_name == 'HiCARN':
         _netG = HiCARN.Generator(num_channels=64)
@@ -116,10 +116,7 @@ def get_d_loss_fn(_model_name):
 
 
 def get_loss_fn(_model_name, device='cpu'):
-    if _model_name == 'HiRDN' or _model_name == 'HiRDN_T':
-        logging.debug('Using HiRDN_Loss')
-        loss = HiRDN_Loss.LossL(device=device)
-    elif _model_name == 'HiRDN_L':
+    if _model_name == 'HiRDN':
         logging.debug('Using HiRDN_Loss')
         loss = HiRDN_Loss.LossL(device=device)
     elif _model_name == 'DeepHiC':
@@ -135,3 +132,4 @@ def get_loss_fn(_model_name, device='cpu'):
         logging.debug('Using HiCARN_Loss')
         loss = HiCARN_1_Loss.GeneratorLoss()
     return loss
+从

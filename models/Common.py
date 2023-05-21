@@ -79,24 +79,6 @@ def get_act_fn(act_type, inplace=True, neg_slope=0.05, n_prelu=1):
 # ================== private func end ==========================
 
 
-__attention_dict = {
-    'CA': CA,
-    'HiCBAM': HiCBAM,
-    'LKA': LKA,
-    'PA': PA,
-    'HiConvMod': HiConvMod
-}
-
-
-# ================== public func start ==========================
-def get_attn_by_name(name, channels):
-    if name == 'None':
-        return None
-    if name not in __attention_dict:
-        raise NotImplementedError('Attention layer [{:s}] is not found'.format(name))
-    return __attention_dict[name](channels)
-
-
 def conv_layer(in_channels, out_channels, kernel_size, stride=1, dilation=1, groups=1):
     r"""
     func   -  auto calculate padding,

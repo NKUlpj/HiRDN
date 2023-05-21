@@ -6,53 +6,52 @@
 @Date: 2023/4/10 下午1:56
 """
 
-from models.Common import *
-from models.Component import HiDB
-import logging
 import torch
 import torch.nn as nn
-from utils.config import set_log_config
-set_log_config()
+from models.Common import conv_block
+from models.Component import HiAB
+from models.Attention import ESA
 
 
 class HiRDN(nn.Module):
-    def __init__(self, in_channels=1, out_channels=1, mode='T') -> None:
+    def __init__(self, in_channels=1, out_channels=1) -> None:
         super(HiRDN, self).__init__()
-        _hidden_channels = (48 if mode == 'T' else 52)
-        _block_num = (4 if mode == 'T' else 6)
-        self.fea_conv = conv_layer(in_channels, _hidden_channels, kernel_size=3)
+        _hidden_channels = 32
+        _block_num = 7
+        self.fea_conv = nn.Conv2d(in_channels, _hidden_channels, 3, padding='same')
 
-        # HiDB
-        self.hidb_group = nn.ModuleList()
-        for _ in range(_block_num):
-            self.hidb_group.append(
-                HiDB(channels=_hidden_channels, mode=mode)
-            )
+        # HiAB
+        self.b1 = HiAB(channels=_hidden_channels)
+        self.b2 = HiAB(channels=_hidden_channels)
+        self.b3 = HiAB(channels=_hidden_channels)
+        self.b4 = HiAB(channels=_hidden_channels)
+        self.b5 = HiAB(channels=_hidden_channels)
+        self.b6 = HiAB(channels=_hidden_channels)
+        self.b7 = HiAB(channels=_hidden_channels)
 
         # reduce channels
         self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='gelu')
-        self.LR_conv = conv_layer(_hidden_channels, _hidden_channels, kernel_size=3)
-        self.exit = conv_block(_hidden_channels, out_channels, kernel_size=3, stride=1, act_type='gelu')
-
-        # attention block
-        if mode != 'T':
-            self.ca = get_attn_by_name('CA', _hidden_channels * _block_num)
-            self.pa = get_attn_by_name('PA', _hidden_channels * _block_num)
+        self.LR_conv = nn.Conv2d(_hidden_channels, _hidden_channels, 3, padding='same')
+        self.attn = ESA(channels=_hidden_channels)
+        self.exit = nn.Conv2d(_hidden_channels, out_channels, kernel_size=3, stride=1, padding='same')
+        self.act = nn.Tanh()
 
     def forward(self, x):
         out_fea = self.fea_conv(x)
-        x1 = out_fea.clone()
-        cat_arr = []
-        for hidb in self.hidb_group:
-            x1 = hidb(x1)
-            cat_arr.append(x1.clone())
-        x1 = torch.cat(cat_arr, dim=1)
 
-        if hasattr(self, 'ca'):
-            x1 = self.ca(x1)
-            x1 = self.pa(x1)
+        out_b1 = self.b1(out_fea)
+        out_b2 = self.b2(out_b1)
+        out_b3 = self.b3(out_b2)
+        out_b4 = self.b4(out_b3)
 
-        out_b = self.c(x1)
+        out_b5 = self.b5(out_b4)
+        out_b6 = self.b6(out_b5)
+        out_b7 = self.b6(out_b6)
+
+        out_b = self.c(torch.cat([out_b1, out_b2, out_b3, out_b4, out_b5, out_b6, out_b7], dim=1))
+
         out_lr = self.LR_conv(out_b) + out_fea
+
+        out_lr = self.attn(out_lr)
         output = self.exit(out_lr)
-        return output
+        return (self.act(output) + 1) / 2

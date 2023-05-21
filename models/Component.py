@@ -6,51 +6,15 @@
 @Date: 2023/4/24 上午11:14 
 ALL IN ONE
 """
-
-
 import torch
 import torch.nn as nn
 
 from models.Common import *
 
 
-class Scale(nn.Module):
-    """
-    Input x [B, C, H, W]
-    return lambda * x
-    """
-    def __init__(self, init_value=1) -> None:
-        super(Scale, self).__init__()
-        self.scale = nn.Parameter(torch.FloatTensor([init_value]))
-
-    def forward(self, x):
-        return x * self.scale
-
-
-class ResidualUnit(nn.Module):
-    def __init__(self, channels, kernel_size=3, reduction=2, bias=True) -> None:
-        super(ResidualUnit, self).__init__()
-        r'''
-        in:         [C * W * H]
-        reduction:  [C * W * H]   ---> [C/2 * W * H]
-        expansion:  [C/2 * W * H] ---> [C * W * H]
-        out:        [C * W * H]
-        '''
-        hidden_channels = channels // reduction
-        self.reduction = nn.Conv2d(channels, hidden_channels, kernel_size, padding='same', bias=bias)
-        self.expansion = nn.Conv2d(hidden_channels, channels, kernel_size, padding='same', bias=bias)
-        self.scale1 = Scale(1)
-        self.scale2 = Scale(1)
-
-    def forward(self, x):
-        x1 = self.reduction(x)
-        x1 = self.expansion(x1)
-        return self.scale1(x) + self.scale2(x1)
-
-
 class HiFM(nn.Module):
 
-    def __init__(self, channels, mode, k=2) -> None:
+    def __init__(self, channels, k=4) -> None:
         super(HiFM, self).__init__()
         r'''
         in:         [C * W * H]
@@ -59,57 +23,57 @@ class HiFM(nn.Module):
         self.k = k
         self.net = nn.Sequential(
             nn.AvgPool2d(kernel_size=self.k, stride=self.k),
+            nn.Conv2d(channels, channels, 3, padding='same'),
+            nn.GELU(),
             nn.Upsample(scale_factor=self.k, mode='nearest')
         )
-        if mode != 'T':
-            self.attn = get_attn_by_name('LKA', channels * 2)
+        self.attn = HiCBAM(channels * 2)
         self.out = nn.Conv2d(channels * 2, channels // 2, 1, padding='same')
 
     def forward(self, x):
         tl = self.net(x)
         tl = x - tl
         x = torch.cat((x, tl), 1)
-        if hasattr(self, 'attn') and self.attn is not None:
-            x = self.attn(x)
+        x = self.attn(x)
         x = self.out(x)
         return x
 
 
-class HiDB(nn.Module):
-    def __init__(self, channels, mode) -> None:
-        super(HiDB, self).__init__()
-        r'''
-        in:         [C * W * H]
-        out:        [C * W * H]
-        '''
-        hidden_channels = channels // 2
+class HiAB(nn.Module):
+    def __init__(self, channels):
+        super(HiAB, self).__init__()
+        _hidden_channels = channels//2
 
-        self.c1_r = ResidualUnit(channels)
-        self.c2_r = ResidualUnit(channels)
-        self.c3_r = ResidualUnit(channels)
+        self.hifm1 = HiFM(channels)
+        self.c1_r = conv_layer(channels, channels, 3)
 
-        self.c4 = conv_layer(channels, hidden_channels, 3)
-        self.act = get_act_fn('gelu')
+        self.hifm2 = HiFM(channels)
+        self.c2_r = conv_layer(channels, channels, 3)
 
-        self.c = conv_layer(hidden_channels * 2, channels, 1)
-        if mode != 'T':
-            self.attn = get_attn_by_name('HiConvMod', channels)
+        self.hifm3 = HiFM(channels)
+        self.c3_r = conv_layer(channels, channels, 3)
 
-        self.hifm = HiFM(channels, mode=mode)
+        self.c4 = conv_layer(channels, channels, 3)
+
+        self.act = nn.GELU()
+        self.c5 = conv_layer(channels * 2, channels, 1)
+        self.attn = LKConv(channels)
 
     def forward(self, x):
-        distilled_c1 = self.act(self.hifm(x))
+        distilled_c1 = self.act(self.hifm1(x))
+        r_c1 = (self.c1_r(x))
+        r_c1 = self.act(r_c1 + x)
 
-        r_c1 = self.act(self.c1_r(x))
-        r_c2 = self.act(self.c2_r(r_c1))
-        r_c3 = self.act(self.c3_r(r_c2))
+        distilled_c2 = self.act(self.hifm2(r_c1))
+        r_c2 = (self.c2_r(r_c1))
+        r_c2 = self.act(r_c2+r_c1)
+
+        distilled_c3 = self.act(self.hifm3(r_c2))
+        r_c3 = (self.c3_r(r_c2))
+        r_c3 = self.act(r_c3+r_c2)
+
         r_c4 = self.act(self.c4(r_c3))
 
-        out = torch.cat([distilled_c1, r_c4], dim=1)
-        out = self.c(out)
-
-        if hasattr(self, 'attn') and self.attn is not None:
-            out = self.attn(out)
-
-        return out
-
+        out = torch.cat([distilled_c1, distilled_c2, distilled_c3, r_c4], dim=1)
+        out_fused = self.attn(self.c5(out))
+        return out_fused

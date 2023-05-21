@@ -11,101 +11,30 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class LayerNorm(nn.Module):
-    r""" From ConvNeXt (https://arxiv.org/pdf/2201.03545.pdf)
-    why rewrite F.layer_norm ?
-    see https://github.com/facebookresearch/ConvNeXt/issues/112
-    """
-
-    def __init__(self, normalized_shape, eps=1e-6, data_format="channels_last"):
-        super().__init__()
-        self.weight = nn.Parameter(torch.ones(normalized_shape))
-        self.bias = nn.Parameter(torch.zeros(normalized_shape))
-        self.eps = eps
-        self.data_format = data_format
-        if self.data_format not in ["channels_last", "channels_first"]:
-            raise NotImplementedError
-        self.normalized_shape = (normalized_shape,)
-
-    def forward(self, x):
-        if self.data_format == "channels_last":
-            return F.layer_norm(x, self.normalized_shape, self.weight, self.bias, self.eps)
-        elif self.data_format == "channels_first":
-            u = x.mean(1, keepdim=True)
-            s = (x - u).pow(2).mean(1, keepdim=True)
-            x = (x - u) / torch.sqrt(s + self.eps)
-            x = self.weight[:, None, None] * x + self.bias[:, None, None]
-            return x
-
-
-# Former-Style Spatial Attention
-class ConvMod(nn.Module):
-    r"""Conv2Former
-    https://arxiv.org/abs/2211.11943
-    https://github.com/HVision-NKU/Conv2Former
-    """
+class PA(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        self.norm = LayerNorm(channels, eps=1e-6, data_format='channels_first')
-        self.a = nn.Sequential(
-            nn.Conv2d(channels, channels, 1),
-            nn.GELU(),
-            nn.Conv2d(channels, channels, 13, padding='same', groups=channels)  # n - k + 2p + 1 = n
-        )
-        self.v = nn.Conv2d(channels, channels, 1)
-        self.proj = nn.Conv2d(channels, channels, 1)
+        self.conv = nn.Conv2d(channels, channels, 1)
+        self.act = nn.Sigmoid()
 
     def forward(self, x):
-        r = self.norm(x)
-        a = self.a(r)
-        r = a * self.v(r)
-        r = self.proj(r)
-        return r
+        y = self.conv(x)
+        y = self.act(y)
+        return torch.mul(x, y)
 
 
-class PA(nn.Module):
-    def __init__(self, channels, reduction=4):
-        super(PA, self).__init__()
-        self.pa = nn.Sequential(
-            nn.Conv2d(channels, channels // reduction, 1, padding='same', bias=True),
-            nn.GELU(),
-            nn.Conv2d(channels // reduction, 1, 1, padding='same', bias=True),
-            nn.Sigmoid()
-        )
+class SA(nn.Module):
+    def __init__(self, kernel_size=7):
+        super(SA, self).__init__()
+        self.conv1 = nn.Conv2d(2, 1, kernel_size, padding='same', bias=False)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        y = self.pa(x)
-        return x * y
-
-
-# Basic Channel Attention
-class CA(nn.Module):
-    def __init__(self, channels, reduction=4) -> None:
-        super(CA, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.conv_du = nn.Sequential(
-            nn.Conv2d(channels, channels // reduction, 1, padding=0, bias=True),
-            nn.GELU(),
-            nn.Conv2d(channels // reduction, channels, 1, padding=0, bias=True),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        y = self.avg_pool(x)
-        y = self.conv_du(y)
-        return y * x
-
-
-class HiConvMod(nn.Module):
-    def __init__(self, channels) -> None:
-        super(HiConvMod, self).__init__()
-        self.spatial_attention = ConvMod(channels)
-        self.pixel_attention = PA(channels)
-
-    def forward(self, x):
-        out = self.pixel_attention(x)
-        out = self.spatial_attention(out)
-        return out
+        avg_out = torch.mean(x, dim=1, keepdim=True)
+        max_out, _ = torch.max(x, dim=1, keepdim=True)
+        m = torch.cat([avg_out, max_out], dim=1)
+        m = self.conv1(m)
+        return x * self.sigmoid(m)
 
 
 class HiCBAM(nn.Module):
@@ -113,26 +42,22 @@ class HiCBAM(nn.Module):
     Input: B * C * H * W
     Out:   B * C * H * W
     """
-
     def __init__(self, channels) -> None:
         super(HiCBAM, self).__init__()
-        self.channel_attention = CA(channels)
         self.pixel_attention = PA(channels)
+        self.space_attention = SA()
 
     def forward(self, x):
-        out = self.channel_attention(x)
-        out = self.pixel_attention(out)
+        out = self.pixel_attention(x)
+        out = self.space_attention(out)
         return out
 
 
 class LKA(nn.Module):
-    r"""
-    https://arxiv.org/abs/2202.09741
-    """
     def __init__(self, channels):
         super(LKA, self).__init__()
-        self.conv0 = nn.Conv2d(channels, channels, 9, padding='same', groups=channels)
-        self.conv_spatial = nn.Conv2d(channels, channels, 15, stride=1, padding='same', groups=channels, dilation=3)
+        self.conv0 = nn.Conv2d(channels, channels, 7, padding='same', groups=channels)
+        self.conv_spatial = nn.Conv2d(channels, channels, 13, stride=1, padding='same', groups=channels, dilation=3)
         self.conv1 = nn.Conv2d(channels, channels, 1)
 
     def forward(self, x):
@@ -141,3 +66,49 @@ class LKA(nn.Module):
         attn = self.conv_spatial(attn)
         attn = self.conv1(attn)
         return u * attn
+
+
+class ESA(nn.Module):
+    def __init__(self, channels):
+        super(ESA, self).__init__()
+        f = channels // 4
+        self.conv1 = nn.Conv2d(channels, f, kernel_size=1)
+        self.conv_f = nn.Conv2d(f, f, kernel_size=1)
+        self.conv_max = nn.Conv2d(f, f, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(f, f, kernel_size=3, stride=2, padding=0)
+        self.conv3 = nn.Conv2d(f, f, kernel_size=3, padding=1)
+        self.conv3_ = nn.Conv2d(f, f, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(f, channels, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        c1_ = (self.conv1(x))
+        c1 = self.conv2(c1_)
+        v_max = F.max_pool2d(c1, kernel_size=7, stride=3)
+        v_range = self.relu(self.conv_max(v_max))
+        c3 = self.relu(self.conv3(v_range))
+        c3 = self.conv3_(c3)
+        c3 = F.interpolate(c3, (x.size(2), x.size(3)), mode='bilinear', align_corners=False)
+        cf = self.conv_f(c1_)
+        c4 = self.conv4(c3 + cf)
+        m = self.sigmoid(c4)
+        return x * m
+
+
+class LKConv(nn.Module):
+    def __init__(self, channels):
+        super().__init__()
+        self.proj_1 = nn.Conv2d(channels, channels, 1)
+        self.activation = nn.GELU()
+        self.spatial_gating_unit = LKA(channels)
+        self.proj_2 = nn.Conv2d(channels, channels, 1)
+
+    def forward(self, x):
+        shortcut = x.clone()
+        x = self.proj_1(x)
+        x = self.activation(x)
+        x = self.spatial_gating_unit(x)
+        x = self.proj_2(x)
+        x = x + shortcut
+        return x

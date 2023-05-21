@@ -23,9 +23,11 @@ __log_format = '%(asctime)s [%(levelname)s] - %(message)s'
 root_dir = 'Datasets_NPZ'  # Example of root directory name
 
 # 'train' and 'valid' can be changed for different train/valid set splitting
-set_dict = {'train': [1, 3, 5, 7, 8, 9, 11, 13, 15, 17, 18, 19],
+set_dict = {'train': [1, 3, 5, 7, 8, 9, 11, 13, 15, 17, 18, 19, 21],
             'valid': [2, 6, 10, 12],
-            'test': [4, 14, 16, 20]
+            'test': [4, 14, 16, 20],
+            'K562_test': [3, 11, 19, 21],
+            'CH12-LX_test': [4, 9, 15, 18],
             }  # 19
 
 set_lr_cutoff = {
