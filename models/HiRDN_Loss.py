@@ -19,29 +19,17 @@ class LossL(nn.Module):
     Loss_L = [r1 * vgg(3) + r2 * vgg(8) + r3 * vgg(15)] + alpha * dists_loss + beta * MS_SSIM_L1_LOSS
     MS_SSIM_L1_LOSS = beta1 * loss_ms_ssim + (1 - beta1) * gaussian_l1
     """
+
     def __init__(self, device):
         super().__init__()
-        vgg = vgg16(pretrained=True)
-        # vgg = vgg16(weights='VGG16_Weights.IMAGENET1K_V1')
         self.device = device
-        self.loss_weights = [0.1, 0.1]
-        loss_networks = []
-        for layer in [8, 35]:
-            loss_network = nn.Sequential(*list(vgg.features)[:layer]).eval()
-            for param in loss_network.parameters():
-                param.requires_grad = False
-            loss_networks.append(loss_network)
-        self.loss_networks = loss_networks
-        self.mse_loss = nn.MSELoss(reduce=True, size_average=True)
-        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.84)
+        self.ms_ssim_l1_loss = MS_SSIM_L1_LOSS(device=device, alpha=0.84, weight=1)
+        self.vgg_loss = VGG_Loss(weight=0.01, layer=8)
 
     def forward(self, out_images, target_images):
-        perception_loss = 0
-        for idx, _loss_network in enumerate(self.loss_networks):
-            _loss_network.to(self.device)
-            _out_feat = _loss_network(out_images.repeat([1, 3, 1, 1]))
-            _target_feat = _loss_network(target_images.repeat([1, 3, 1, 1]))
-            perception_loss += self.loss_weights[idx] * self.mse_loss(_out_feat, _target_feat)
+        vgg_sr = out_images.repeat([1, 3, 1, 1])
+        vgg_hr = target_images.repeat([1, 3, 1, 1])
+        perception_loss = self.vgg_loss(vgg_sr, vgg_hr)
         ms_ssim_l1_loss = self.ms_ssim_l1_loss(out_images, target_images)
         return ms_ssim_l1_loss + perception_loss
 
@@ -52,8 +40,9 @@ class MS_SSIM_L1_LOSS(nn.Module):
     Paper "Loss Functions for Image Restoration With Neural Networks"
     """
 
-    def __init__(self, device, data_range=1.0, k=(0.01, 0.03), alpha=0.84, compensation=1, channel=1):
+    def __init__(self, device, data_range=1.0, alpha=0.84, weight=1., channel=1):
         super(MS_SSIM_L1_LOSS, self).__init__()
+        k = (0.01, 0.03)
         gaussian_sigmas = [0.5, 1.0, 2.0, 4.0, 8.0]
         self.channel = channel
         self.DR = data_range
@@ -61,7 +50,7 @@ class MS_SSIM_L1_LOSS(nn.Module):
         self.C2 = (k[1] * data_range) ** 2
         self.pad = int(2 * gaussian_sigmas[-1])
         self.alpha = alpha
-        self.compensation = compensation
+        self.weight = weight
         filter_size = int(4 * gaussian_sigmas[-1] + 1)
         g_masks = torch.zeros((self.channel * len(gaussian_sigmas), 1, filter_size, filter_size))
         for idx, sigma in enumerate(gaussian_sigmas):
@@ -136,5 +125,44 @@ class MS_SSIM_L1_LOSS(nn.Module):
                                groups=c, padding=self.pad).mean(1)  # [B, H, W]
 
         loss_mix = self.alpha * loss_ms_ssim + (1 - self.alpha) * gaussian_l1 / self.DR
-        return loss_mix.mean()
+        return self.weight * loss_mix.mean()
 
+
+class MeanShift(nn.Conv2d):
+    def __init__(self, rgb_mean=(0.4488, 0.4371, 0.4040), rgb_std=(1.0, 1.0, 1.0), sign=-1):
+        super(MeanShift, self).__init__(3, 3, kernel_size=1)
+        std = torch.Tensor(rgb_std)
+        self.weight.data = torch.eye(3).view(3, 3, 1, 1) / std.view(3, 1, 1, 1)
+        self.bias.data = sign * 1 * torch.Tensor(rgb_mean) / std
+        for p in self.parameters():
+            p.requires_grad = False
+
+
+class VGG_Loss(nn.Module):
+    def __init__(self, weight=1.0, layer=35):
+        super().__init__()
+        pretrained_vgg = vgg16(pretrained=True)
+        modules = [m for m in pretrained_vgg.features]
+        self.vgg = nn.Sequential(*modules[:layer])
+        self.weight = weight
+
+        vgg_mean = (0.485, 0.456, 0.406)
+        vgg_std = (0.229, 0.224, 0.225)
+
+        self.sub_mean = MeanShift(vgg_mean, vgg_std)
+
+        for p in self.parameters():
+            p.requires_grad = False
+
+    def forward(self, sr, hr):
+        def _forward(x):
+            x = self.sub_mean(x)
+            x = self.vgg(x)
+            return x
+
+        vgg_sr = _forward(sr)
+        with torch.no_grad():
+            vgg_hr = _forward(hr.detach())
+
+        loss = F.mse_loss(vgg_hr, vgg_sr)
+        return self.weight * loss

@@ -30,11 +30,10 @@ class HiRDN(nn.Module):
         self.b7 = HiAB(channels=_hidden_channels)
 
         # reduce channels
-        self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='gelu')
+        self.c = conv_block(_hidden_channels * _block_num, _hidden_channels, kernel_size=1, act_type='lrelu')
         self.LR_conv = nn.Conv2d(_hidden_channels, _hidden_channels, 3, padding='same')
         self.attn = ESA(channels=_hidden_channels)
         self.exit = nn.Conv2d(_hidden_channels, out_channels, kernel_size=3, stride=1, padding='same')
-        self.act = nn.Tanh()
 
     def forward(self, x):
         out_fea = self.fea_conv(x)
@@ -50,8 +49,9 @@ class HiRDN(nn.Module):
 
         out_b = self.c(torch.cat([out_b1, out_b2, out_b3, out_b4, out_b5, out_b6, out_b7], dim=1))
 
-        out_lr = self.LR_conv(out_b) + out_fea
+        out_lr = self.LR_conv(out_b)  # + out_fea
 
         out_lr = self.attn(out_lr)
         output = self.exit(out_lr)
-        return (self.act(output) + 1) / 2
+        return output
+

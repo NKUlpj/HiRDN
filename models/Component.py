@@ -53,7 +53,7 @@ class HiAB(nn.Module):
         self.hifm3 = HiFM(channels)
         self.c3_r = conv_layer(channels, channels, 3)
 
-        self.c4 = conv_layer(channels, channels, 3)
+        self.c4 = conv_layer(channels, _hidden_channels, 3)
 
         self.act = nn.GELU()
         self.c5 = conv_layer(channels * 2, channels, 1)
@@ -76,4 +76,5 @@ class HiAB(nn.Module):
 
         out = torch.cat([distilled_c1, distilled_c2, distilled_c3, r_c4], dim=1)
         out_fused = self.attn(self.c5(out))
+        # there is no global residual connection
         return out_fused

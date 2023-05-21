@@ -132,4 +132,3 @@ def get_loss_fn(_model_name, device='cpu'):
         logging.debug('Using HiCARN_Loss')
         loss = HiCARN_1_Loss.GeneratorLoss()
     return loss
-从

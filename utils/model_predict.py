@@ -67,7 +67,7 @@ def __model_predict_without_target(model, _loader, ckpt_file):
             predict_bar.set_description(
                 desc=f"[Predicting in Test set]")
             predict_data = sr.to('cpu').numpy()
-            predict_data[predict_data < 0] = 0  # no Negative Number
+            # predict_data[predict_data < 0] = 0  # no Negative Number
             res_data.append(predict_data)
             res_inds.append(inds.numpy())
 
@@ -112,7 +112,7 @@ def __model_predict(model, _loader, ckpt_file):
                 desc=f"[Predicting in Test set] PSNR: {val_res['psnr']:.6f} dB;"
                      f"SSIM: {val_res['ssims']/val_res['samples']:.6f};  DISTS: {_avg_dists:.6f}; ")
             predict_data = sr.to('cpu').numpy()
-            predict_data[predict_data < 0] = 0  # no Negative Number
+            # predict_data[predict_data < 0] = 0  # no Negative Number
             res_data.append(predict_data)
             res_inds.append(inds.numpy())
 
