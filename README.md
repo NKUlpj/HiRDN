@@ -1,6 +1,6 @@
 # HiRDN
 
-![](./img/HiRDN.png)
+![](./img/HiADN.png)
 
 ## Unique features of HiRDN
 ![](./img/Compare.png)
