@@ -8,13 +8,6 @@
 """
 import numpy as np
 
-import numpy as np
-import pandas as pd
-from cooler.create import ArrayLoader
-import cooler
-
-
-
 
 def numpy_to_top_dom(_matrix_file, _out_file, _chr_num: int):
     m = np.load(_matrix_file, allow_pickle=True)['hic']

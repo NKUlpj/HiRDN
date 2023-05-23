@@ -13,17 +13,6 @@ import cooler
 
 
 def __numpy_to_cooler(_in_file, _out_file, _res, _chr):
-    r"""
-    Parameters
-    ----------
-    _in_file
-    _out_file
-    _res
-    _chr
-
-    Returns
-    -------
-    """
     _heatmap = np.load(_in_file, allow_pickle=True)['hic']
     _shape = _heatmap.shape[0]
     _lst = [{"name": _chr, "length": _shape * _res}]
