@@ -8,7 +8,9 @@
 * todo
 * todo
 
-![](./img/Compare_Params.png)
+![Compute Times](./img/Compare_Params.png)
+
+![TAD Detection](./img/TAD_Compare.png)
 
 ## Navigation
 1. [Installation](#installation)
